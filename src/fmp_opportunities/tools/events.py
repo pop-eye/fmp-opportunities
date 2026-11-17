@@ -29,6 +29,19 @@ def _detect_cost(text: str) -> Optional[str]:
 
 _DATE_PATTERN = re.compile(r"\b(\d{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b")
 _FULL_DATE_PATTERN = re.compile(r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b")
+_US_DATE_PATTERN = re.compile(r"\b([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})\b")
+
+
+def _normalise_any_date(raw: Optional[str]) -> Optional[str]:
+    if not raw:
+        return None
+    us_match = _US_DATE_PATTERN.search(raw)
+    if us_match:
+        reordered = f"{us_match.group(2)} {us_match.group(1)} {us_match.group(3)}"
+        parsed = _normalise_uk_date(reordered)
+        if parsed:
+            return parsed
+    return _normalise_uk_date(raw)
 
 
 def _extract_event_dates(text: str) -> tuple[Optional[str], Optional[str]]:
@@ -38,7 +51,6 @@ def _extract_event_dates(text: str) -> tuple[Optional[str], Optional[str]]:
         return _normalise_uk_date(full_dates[0]), _normalise_uk_date(full_dates[-1])
     if len(full_dates) == 1:
         end_iso = _normalise_uk_date(full_dates[0])
-        # Check for range like "18 Nov - 20 Dec 2026" where start lacks year
         year = end_iso[:4] if end_iso else ""
         all_parts = _DATE_PATTERN.findall(text)
         if len(all_parts) >= 2 and year:
@@ -48,6 +60,15 @@ def _extract_event_dates(text: str) -> tuple[Optional[str], Optional[str]]:
                 if start_iso:
                     return start_iso, end_iso
         return end_iso, None
+
+    us_dates = _US_DATE_PATTERN.findall(text)
+    if len(us_dates) >= 2:
+        first = _normalise_uk_date(f"{us_dates[0][1]} {us_dates[0][0]} {us_dates[0][2]}")
+        last = _normalise_uk_date(f"{us_dates[-1][1]} {us_dates[-1][0]} {us_dates[-1][2]}")
+        return first, last
+    if len(us_dates) == 1:
+        first = _normalise_uk_date(f"{us_dates[0][1]} {us_dates[0][0]} {us_dates[0][2]}")
+        return first, None
     return None, None
 
 
@@ -99,11 +120,12 @@ def parse_homemcr(
 
 
 def parse_factory_international(
-    source: SourceConfig, body: str, _fetcher: PoliteFetcher
+    source: SourceConfig, body: str, fetcher: PoliteFetcher
 ) -> list[Listing]:
     """Parse Factory International / Aviva Studios Whats On HTML page."""
     soup = BeautifulSoup(body, "html.parser")
     listings: list[Listing] = []
+    seen_urls: set[str] = set()
 
     for link in soup.select("a[href*='/whats-on/']"):
         title = link.get_text(" ", strip=True)
@@ -111,9 +133,28 @@ def parse_factory_international(
         if not title or len(title) < 4 or href.rstrip("/") == "/whats-on" or _is_utility_event_link(title, href):
             continue
 
+        full_url = urljoin(source.url, href)
+        if full_url in seen_urls:
+            continue
+        seen_urls.add(full_url)
+
         card = link.find_parent(["article", "li"]) or link.find_parent("div") or link.parent
         card_text = card.get_text(" ", strip=True) if card else ""
         event_start, event_end = _extract_event_dates(card_text)
+        cost = _detect_cost(card_text)
+
+        if event_start is None and source.options.get("fetch_details", True):
+            try:
+                detail_body = fetcher.get_text(
+                    full_url, rate_limit_seconds=source.rate_limit_seconds
+                )
+                detail_soup = BeautifulSoup(detail_body, "html.parser")
+                detail_text = detail_soup.get_text(" ", strip=True)
+                event_start, event_end = _extract_event_dates(detail_text[:3000])
+                if cost is None:
+                    cost = _detect_cost(detail_text[:3000])
+            except Exception:
+                pass
 
         listings.append(
             Listing(
@@ -121,6 +162,127 @@ def parse_factory_international(
                 organisation="Factory International (Aviva Studios)",
                 location="Manchester",
                 remote=False,
+                type="event",
+                summary=card_text[:400],
+                posted_date=event_start,
+                event_start=event_start,
+                event_end=event_end,
+                cost=cost,
+                source_name=source.name,
+                source_url=full_url,
+            )
+        )
+
+    return listings
+
+
+def parse_rts_events(
+    source: SourceConfig, body: str, _fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Parse Royal Television Society events page."""
+    soup = BeautifulSoup(body, "html.parser")
+    listings: list[Listing] = []
+
+    for link in soup.select("a[href^='/events/']"):
+        href = str(link.get("href", ""))
+        if href.rstrip("/") == "/events":
+            continue
+        heading = link.find(["h2", "h3", "h4"])
+        title = heading.get_text(" ", strip=True) if heading else link.get_text(" ", strip=True)
+        if not title or len(title) < 4 or _is_utility_event_link(title, href):
+            continue
+
+        card = link.find_parent(["article", "li", "div"]) or link
+        card_text = card.get_text(" ", strip=True)
+        event_start, event_end = _extract_event_dates(card_text)
+
+        location = "UK"
+        for loc in ("Manchester", "North West", "Salford", "London", "Birmingham", "Bristol", "Online"):
+            if loc.lower() in card_text.lower():
+                location = loc
+                break
+
+        listings.append(
+            Listing(
+                title=title,
+                organisation="Royal Television Society",
+                location=location,
+                remote="online" in card_text.lower(),
+                type="event",
+                summary=card_text[:400],
+                posted_date=event_start,
+                event_start=event_start,
+                event_end=event_end,
+                cost=_detect_cost(card_text),
+                source_name=source.name,
+                source_url=urljoin(source.url, href),
+            )
+        )
+
+    return listings
+
+
+def parse_creative_uk_events(
+    source: SourceConfig, body: str, _fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Parse Creative UK public events page."""
+    soup = BeautifulSoup(body, "html.parser")
+    listings: list[Listing] = []
+
+    for link in soup.select("h3 a[href], a[href*='eventbrite.co.uk/e/']"):
+        title = link.get_text(" ", strip=True)
+        href = str(link.get("href", ""))
+        if not title or len(title) < 6 or _is_utility_event_link(title, href):
+            continue
+
+        card = link.find_parent(["article", "li", "div"]) or link.parent
+        card_text = card.get_text(" ", strip=True) if card else ""
+        event_start, event_end = _extract_event_dates(card_text)
+
+        listings.append(
+            Listing(
+                title=title,
+                organisation="Creative UK",
+                location="Online / UK" if "webinar" in card_text.lower() or "online" in card_text.lower() else "UK",
+                remote="webinar" in card_text.lower() or "online" in card_text.lower(),
+                type="event",
+                summary=card_text[:400],
+                posted_date=event_start,
+                event_start=event_start,
+                event_end=event_end,
+                cost=_detect_cost(card_text),
+                source_name=source.name,
+                source_url=urljoin(source.url, href),
+            )
+        )
+
+    return listings
+
+
+def parse_ukie_events(
+    source: SourceConfig, body: str, _fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Parse UKIE games and interactive media events page."""
+    soup = BeautifulSoup(body, "html.parser")
+    listings: list[Listing] = []
+
+    for link in soup.select("a[href*='eventbrite.co.uk/e/'], a[href*='/events/']"):
+        href = str(link.get("href", ""))
+        heading = link.find(["h2", "h3", "h4"])
+        title = heading.get_text(" ", strip=True) if heading else link.get_text(" ", strip=True)
+        if not title or len(title) < 6 or _is_utility_event_link(title, href):
+            continue
+
+        card = link.find_parent(["article", "li", "div"]) or link
+        card_text = card.get_text(" ", strip=True)
+        event_start, event_end = _extract_event_dates(card_text)
+
+        listings.append(
+            Listing(
+                title=title,
+                organisation="UKIE (Games & Interactive)",
+                location="London" if "london" in card_text.lower() else "UK",
+                remote="online" in card_text.lower() or "webinar" in card_text.lower(),
                 type="event",
                 summary=card_text[:400],
                 posted_date=event_start,

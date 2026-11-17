@@ -10,12 +10,15 @@ from icalendar import Calendar
 
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
 from fmp_opportunities.core.fetcher import PoliteFetcher, parse_ical_feed
+from fmp_opportunities.core.filter import assign_discipline_tags
 from fmp_opportunities.core.llm import create_llama_cpp_hook
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.tools.events import (
     _extract_event_dates,
     event_sort_key,
     parse_homemcr,
+    parse_rts_events,
+    parse_ukie_events,
     run_events,
 )
 from fmp_opportunities.tools.placements import (
@@ -204,3 +207,51 @@ def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:
     )
     assert result["relevant"] is True
     assert result["type"] == "sandwich year"
+
+
+def test_discipline_tagging_and_new_event_parsers(tmp_path: Path) -> None:
+    item = Listing(
+        title="Social Media & Content Marketing Assistant",
+        organisation="Northern Agency",
+        location="Manchester",
+        summary="Create TikTok video campaigns and motion graphics.",
+        source_url="https://example.com/smm",
+    )
+    assign_discipline_tags(item)
+    assert "Social Media and Marketing" in item.category_tags
+    assert "Video and Film" in item.category_tags
+    assert "Motion and Animation" in item.category_tags
+
+    fetcher = StubFetcher({}, tmp_path)
+    rts_html = """
+    <article>
+      <a href="/events/north-west-awards-2026">
+        <h3>North West Awards 2026</h3>
+        <div>Manchester 20 November 2026</div>
+      </a>
+    </article>
+    """
+    rts_items = parse_rts_events(
+        SourceConfig(name="RTS", type="html", url="https://rts.org.uk/events"),
+        rts_html,
+        fetcher,
+    )
+    assert len(rts_items) == 1
+    assert rts_items[0].location == "Manchester"
+    assert rts_items[0].event_start == "2026-11-20"
+
+    ukie_html = """
+    <div>
+      <a href="https://www.eventbrite.co.uk/e/pitching-workshop-123">
+        <div>February 3, 2027</div>
+        <h3>Pitching Skills Workshop</h3>
+      </a>
+    </div>
+    """
+    ukie_items = parse_ukie_events(
+        SourceConfig(name="UKIE", type="html", url="https://ukie.org.uk/events"),
+        ukie_html,
+        fetcher,
+    )
+    assert len(ukie_items) == 1
+    assert ukie_items[0].event_start == "2027-02-03"

@@ -100,10 +100,34 @@ events:
     rate_limit_seconds: 2.0
     notes: Public Whats On page at Aviva Studios, Manchester.
 
+  - name: Royal Television Society Events
+    type: html
+    url: https://rts.org.uk/events
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_rts_events
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows / (Content-Signal search=yes,use=reference). Broadcast, film, and TV industry talks, awards, and screenings.
+
+  - name: Creative UK Events
+    type: html
+    url: https://www.wearecreative.uk/connect/events/
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_creative_uk_events
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows /connect/events/. UK creative industry webinars, networking, and career events.
+
+  - name: UKIE Events
+    type: html
+    url: https://ukie.org.uk/events
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_ukie_events
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows /events. UK games and interactive media workshops, conferences, and networking.
+
   - name: Manchester Digital Events
     type: html
     url: https://www.manchesterdigital.com/events
-    enabled: true
+    enabled: false
     parser: fmp_opportunities.tools.events:parse_manchester_digital
     rate_limit_seconds: 2.0
-    notes: robots.txt allows /events.
+    notes: Disabled by default because event listings load client side via JavaScript.

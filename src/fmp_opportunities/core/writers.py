@@ -61,6 +61,8 @@ def _format_rss_description(listing: Listing) -> str:
         parts.append(f"Location: {loc}")
     if listing.type:
         parts.append(f"Type: {listing.type}")
+    if listing.category_tags:
+        parts.append(f"Disciplines: {', '.join(listing.category_tags)}")
     if listing.paid:
         parts.append(f"Pay: {listing.paid}")
     if listing.event_start:

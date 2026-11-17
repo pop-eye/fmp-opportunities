@@ -10,7 +10,11 @@ from typing import Callable, Optional
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
 from fmp_opportunities.core.dedup import deduplicate_listings
 from fmp_opportunities.core.fetcher import PoliteFetcher, fetch_source_listings
-from fmp_opportunities.core.filter import LLMClassifierHook, filter_listings
+from fmp_opportunities.core.filter import (
+    LLMClassifierHook,
+    assign_discipline_tags,
+    filter_listings,
+)
 from fmp_opportunities.core.models import Listing, utc_now_iso
 from fmp_opportunities.core.state import (
     is_suspicious_drop,
@@ -71,7 +75,10 @@ def run_tool_pipeline(
             logger.error("Source '%s' failed: %s", source.name, exc)
             failed_sources.append(source.name)
 
-    normalised = [normalise_fn(item) if normalise_fn else item for item in raw_listings]
+    normalised = [
+        assign_discipline_tags(normalise_fn(item) if normalise_fn else item)
+        for item in raw_listings
+    ]
     filtered = filter_listings(normalised, keywords=keywords, tool=tool, llm_hook=llm_hook)
     deduped = deduplicate_listings(filtered)
 

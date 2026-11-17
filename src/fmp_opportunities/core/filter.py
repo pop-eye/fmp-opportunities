@@ -14,6 +14,100 @@ logger = logging.getLogger(__name__)
 
 LLMClassifierHook = Callable[[Listing, str], dict[str, Any]]
 
+DISCIPLINE_RULES: dict[str, tuple[str, ...]] = {
+    "Video and Film": (
+        "video",
+        "film",
+        "camera",
+        "cinematography",
+        "documentary",
+        "editing",
+        "editor",
+        "post production",
+        "post-production",
+        "videographer",
+    ),
+    "Audio and Sound": (
+        "audio",
+        "sound",
+        "podcast",
+        "radio",
+        "music",
+        "acoustics",
+        "mixing",
+    ),
+    "Motion and Animation": (
+        "motion",
+        "animation",
+        "animator",
+        "vfx",
+        "after effects",
+        "3d",
+        "cinema 4d",
+        "blender",
+    ),
+    "Social Media and Marketing": (
+        "social media",
+        "marketing",
+        "content creator",
+        "content creation",
+        "digital content",
+        "tiktok",
+        "instagram",
+        "branding",
+        "communications",
+        "campaign",
+    ),
+    "UX and Digital Design": (
+        "ux",
+        "ui",
+        "digital design",
+        "graphic design",
+        "web design",
+        "figma",
+        "user experience",
+        "user interface",
+    ),
+    "Games and Interactive": (
+        "games",
+        "gaming",
+        "interactive",
+        "unreal",
+        "unity",
+        "vr",
+        "ar",
+        "xr",
+        "mixed reality",
+        "creative technology",
+    ),
+    "Broadcast and Producing": (
+        "broadcast",
+        "television",
+        "tv",
+        "producer",
+        "producing",
+        "production assistant",
+        "runner",
+        "researcher",
+        "community media",
+    ),
+}
+
+
+def assign_discipline_tags(listing: Listing) -> Listing:
+    """Assign FMP discipline tags based on title, summary, and existing tags."""
+    searchable = " ".join(
+        [listing.title, listing.summary, " ".join(listing.category_tags)]
+    ).lower()
+    tags = list(listing.category_tags)
+    for discipline, terms in DISCIPLINE_RULES.items():
+        if discipline in tags:
+            continue
+        if any(_contains_term(searchable, term) for term in terms):
+            tags.append(discipline)
+    listing.category_tags = tags
+    return listing
+
 
 @dataclass
 class FilterDecision:

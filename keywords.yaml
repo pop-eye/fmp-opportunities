@@ -31,7 +31,20 @@ global:
     editor: 1.0
     producer: 1.0
     production: 0.8
-    social media: 1.2
+    social media: 1.5
+    marketing: 1.0
+    digital marketing: 1.5
+    content marketing: 1.5
+    branding: 1.0
+    communications: 0.8
+    runner: 1.5
+    edit assistant: 2.0
+    production assistant: 2.0
+    camera: 1.2
+    unreal: 1.5
+    unity: 1.5
+    3d: 1.2
+    vfx: 1.5
     podcast: 1.5
     photography: 1.0
     sound: 1.0
@@ -53,6 +66,17 @@ global:
     - lead engineer
     - 5+ years
     - 10+ years
+    - account executive
+    - business development
+    - recruitment
+    - recruiter
+    - accountant
+    - solicitor
+    - nurse
+    - driver
+    - warehouse
+    - cleaning
+    - chef
 
 jobs:
   min_score: 1.0
@@ -75,3 +99,9 @@ events:
     open call: 1.5
     competition: 1.5
     talk: 1.0
+    conference: 1.5
+    webinar: 1.2
+    awards: 1.2
+    showcase: 1.5
+    tv: 1.0
+    television: 1.2

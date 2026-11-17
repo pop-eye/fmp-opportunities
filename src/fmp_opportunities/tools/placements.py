@@ -178,10 +178,12 @@ def parse_yini(
     for link in soup.select("a[href]"):
         href = str(link.get("href", ""))
         title = link.get_text(" ", strip=True)
-        if not title or len(title) < 6:
+        if not title or len(title) < 12:
+            continue
+        if title.strip().lower() in {"programmes", "employers", "vacancies", "events", "students", "about"}:
             continue
         lower = f"{title} {href}".lower()
-        if not any(k in lower for k in ("placement", "vacancy", "role", "opportunity", "year-in-industry")):
+        if not any(k in lower for k in ("placement", "vacancy", "role", "opportunity")):
             continue
         if href.startswith("#") or href.startswith("mailto:"):
             continue
