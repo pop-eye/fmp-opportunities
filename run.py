@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 from pathlib import Path
 from typing import Sequence
 
@@ -21,6 +22,21 @@ from fmp_opportunities.core.writers import write_combined_rss
 from fmp_opportunities.tools.events import run_events
 from fmp_opportunities.tools.jobs import run_jobs
 from fmp_opportunities.tools.placements import run_placements
+
+
+def load_dotenv_if_present(dotenv_path: Path = Path(".env")) -> None:
+    """Load simple KEY=VALUE pairs from .env when not already set in the environment."""
+    if not dotenv_path.exists():
+        return
+    for raw_line in dotenv_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -87,6 +103,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    load_dotenv_if_present()
     args = parse_args(argv)
     setup_logging(log_dir=args.log_dir, verbose=args.verbose)
     logger = logging.getLogger("fmp_opportunities.run")

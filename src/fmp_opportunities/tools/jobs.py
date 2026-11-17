@@ -62,9 +62,7 @@ def parse_reed_api(
         )
         return []
 
-    keywords = source.options.get(
-        "keywords", "graduate media video motion creative digital"
-    )
+    keywords = source.options.get("keywords", "creative media")
     location = source.options.get("locationName", "Manchester")
     distance = source.options.get("distanceFromLocation", 30)
     results_to_take = source.options.get("resultsToTake", 50)
@@ -122,14 +120,17 @@ def parse_adzuna_api(
         )
         return []
 
-    params = {
+    params: dict[str, object] = {
         "app_id": app_id,
         "app_key": app_key,
         "results_per_page": source.options.get("results_per_page", 50),
-        "what": source.options.get("what", "graduate creative media video digital"),
         "where": source.options.get("where", "Manchester"),
         "content-type": "application/json",
     }
+    if source.options.get("what_or"):
+        params["what_or"] = source.options["what_or"]
+    else:
+        params["what"] = source.options.get("what", "creative media")
     raw_text = fetcher.get_text(
         source.url,
         rate_limit_seconds=source.rate_limit_seconds,

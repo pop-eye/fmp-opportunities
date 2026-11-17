@@ -10,7 +10,7 @@ jobs:
     parser: fmp_opportunities.tools.jobs:parse_reed_api
     rate_limit_seconds: 1.0
     options:
-      keywords: graduate media video motion creative digital
+      keywords: creative media
       locationName: Manchester
       distanceFromLocation: 30
       resultsToTake: 50
@@ -23,7 +23,7 @@ jobs:
     parser: fmp_opportunities.tools.jobs:parse_adzuna_api
     rate_limit_seconds: 1.0
     options:
-      what: graduate creative media video digital
+      what_or: video motion media creative digital ux broadcast
       where: Manchester
       results_per_page: 50
     notes: Official API. Requires ADZUNA_APP_ID and ADZUNA_APP_KEY environment variables.
