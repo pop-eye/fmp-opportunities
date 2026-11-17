@@ -10,7 +10,10 @@ from icalendar import Calendar
 
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
 from fmp_opportunities.core.fetcher import PoliteFetcher, parse_ical_feed
+from fmp_opportunities.core.llm import create_llama_cpp_hook
+from fmp_opportunities.core.models import Listing
 from fmp_opportunities.tools.events import (
+    _extract_event_dates,
     event_sort_key,
     parse_homemcr,
     run_events,
@@ -171,3 +174,33 @@ def test_parse_homemcr_html(tmp_path: Path) -> None:
     assert items[0].event_start == "2026-12-10"
     assert items[0].cost == "Free"
     assert event_sort_key(items[0])[0] == "2026-12-10"
+
+
+def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:
+    start, end = _extract_event_dates("Exhibition runs 18 Nov - 20 Dec 2026 at Aviva Studios")
+    assert start == "2026-11-18"
+    assert end == "2026-12-20"
+
+    class FakeResp:
+        def raise_for_status(self) -> None:
+            pass
+
+        def json(self) -> dict:
+            return {
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"relevant": true, "type": "sandwich year", "reason": "12 month placement"}'
+                        }
+                    }
+                ]
+            }
+
+    monkeypatch.setattr("requests.post", lambda *_args, **_kwargs: FakeResp())
+    hook = create_llama_cpp_hook("http://localhost:8080/v1/chat/completions")
+    result = hook(
+        Listing(title="Creative Tech Placement", organisation="BBC", location="Salford"),
+        "placements",
+    )
+    assert result["relevant"] is True
+    assert result["type"] == "sandwich year"

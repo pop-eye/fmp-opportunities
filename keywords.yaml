@@ -16,10 +16,30 @@ global:
     interactive media: 2.0
     games: 1.5
     ux: 1.5
+    ui: 1.0
     creative producing: 2.0
     community media: 1.5
+    video: 1.0
+    audio: 1.0
+    film: 1.0
+    media: 0.8
+    creative: 0.8
+    digital: 0.8
+    animation: 1.5
+    motion: 1.0
+    editing: 1.0
+    editor: 1.0
+    producer: 1.0
+    production: 0.8
+    social media: 1.2
+    podcast: 1.5
+    photography: 1.0
+    sound: 1.0
+    design: 0.8
     junior: 1.0
     graduate: 1.0
+    trainee: 1.0
+    assistant: 0.8
     entry level: 1.0
     manchester: 1.5
     north west: 1.0
@@ -35,7 +55,7 @@ global:
     - 10+ years
 
 jobs:
-  min_score: 1.5
+  min_score: 1.0
 
 placements:
   min_score: 1.0

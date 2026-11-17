@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Sequence
 
 from fmp_opportunities.core.config import load_keywords, load_sources
+from fmp_opportunities.core.llm import DEFAULT_LLAMA_ENDPOINT, create_llama_cpp_hook
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.core.ops import (
     has_failures,
@@ -99,6 +100,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=Path("logs"),
         help="Directory for rotating logs and weekly summary.",
     )
+    parser.add_argument(
+        "--use-llm",
+        action="store_true",
+        help="Enable optional local llama.cpp server classification hook.",
+    )
+    parser.add_argument(
+        "--llm-url",
+        default=DEFAULT_LLAMA_ENDPOINT,
+        help="OpenAI compatible llama.cpp server chat completions URL.",
+    )
     return parser.parse_args(argv)
 
 
@@ -109,6 +120,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger = logging.getLogger("fmp_opportunities.run")
 
     base_url = args.site_url.rstrip("/")
+    llm_hook = create_llama_cpp_hook(endpoint=args.llm_url) if args.use_llm else None
     results_by_tool: dict[str, list[Listing]] = {}
     pipeline_results: list[PipelineResult] = []
     unexpected_error: str | None = None
@@ -124,6 +136,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 docs_dir=args.docs_dir,
                 state_path=args.state_file,
                 channel_link=f"{base_url}/jobs.html",
+                llm_hook=llm_hook,
                 dry_run=args.dry_run,
             )
             results_by_tool["jobs"] = res.listings
@@ -144,6 +157,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 docs_dir=args.docs_dir,
                 state_path=args.state_file,
                 channel_link=f"{base_url}/placements.html",
+                llm_hook=llm_hook,
                 dry_run=args.dry_run,
             )
             results_by_tool["placements"] = res.listings
@@ -164,6 +178,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 docs_dir=args.docs_dir,
                 state_path=args.state_file,
                 channel_link=f"{base_url}/events.html",
+                llm_hook=llm_hook,
                 dry_run=args.dry_run,
             )
             results_by_tool["events"] = res.listings

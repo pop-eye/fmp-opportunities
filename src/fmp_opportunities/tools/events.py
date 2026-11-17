@@ -27,6 +27,40 @@ def _detect_cost(text: str) -> Optional[str]:
     return None
 
 
+_DATE_PATTERN = re.compile(r"\b(\d{1,2}\s+[A-Za-z]{3,9}(?:\s+\d{4})?)\b")
+_FULL_DATE_PATTERN = re.compile(r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b")
+
+
+def _extract_event_dates(text: str) -> tuple[Optional[str], Optional[str]]:
+    """Extract start and optional end ISO dates from event text."""
+    full_dates = _FULL_DATE_PATTERN.findall(text)
+    if len(full_dates) >= 2:
+        return _normalise_uk_date(full_dates[0]), _normalise_uk_date(full_dates[-1])
+    if len(full_dates) == 1:
+        end_iso = _normalise_uk_date(full_dates[0])
+        # Check for range like "18 Nov - 20 Dec 2026" where start lacks year
+        year = end_iso[:4] if end_iso else ""
+        all_parts = _DATE_PATTERN.findall(text)
+        if len(all_parts) >= 2 and year:
+            first_part = all_parts[0]
+            if not re.search(r"\d{4}", first_part):
+                start_iso = _normalise_uk_date(f"{first_part} {year}")
+                if start_iso:
+                    return start_iso, end_iso
+        return end_iso, None
+    return None, None
+
+
+def _is_utility_event_link(title: str, href: str) -> bool:
+    lower_title = title.strip().lower()
+    lower_href = href.strip().lower()
+    if lower_title in {"add event", "book now", "read more", "find out more", "all events", "what's on", "whats on"}:
+        return True
+    if any(seg in lower_href for seg in ("/members-area/", "/create", "/login", "/register")):
+        return True
+    return False
+
+
 def parse_homemcr(
     source: SourceConfig, body: str, _fetcher: PoliteFetcher
 ) -> list[Listing]:
@@ -37,13 +71,12 @@ def parse_homemcr(
     for link in soup.select("a[href*='/event/'], a[href*='/film/'], a[href*='/whats-on/']"):
         title = link.get_text(" ", strip=True)
         href = str(link.get("href", ""))
-        if not title or len(title) < 4 or href.rstrip("/") == "/whats-on":
+        if not title or len(title) < 4 or href.rstrip("/") == "/whats-on" or _is_utility_event_link(title, href):
             continue
 
         card = link.find_parent(["article", "li", "div"]) or link.parent
         card_text = card.get_text(" ", strip=True) if card else ""
-        date_match = re.search(r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b", card_text)
-        event_start = _normalise_uk_date(date_match.group(0)) if date_match else None
+        event_start, event_end = _extract_event_dates(card_text)
 
         listings.append(
             Listing(
@@ -55,6 +88,7 @@ def parse_homemcr(
                 summary=card_text[:400],
                 posted_date=event_start,
                 event_start=event_start,
+                event_end=event_end,
                 cost=_detect_cost(card_text),
                 source_name=source.name,
                 source_url=urljoin(source.url, href),
@@ -74,13 +108,12 @@ def parse_factory_international(
     for link in soup.select("a[href*='/whats-on/']"):
         title = link.get_text(" ", strip=True)
         href = str(link.get("href", ""))
-        if not title or len(title) < 4 or href.rstrip("/") == "/whats-on":
+        if not title or len(title) < 4 or href.rstrip("/") == "/whats-on" or _is_utility_event_link(title, href):
             continue
 
-        card = link.find_parent(["article", "li", "div"]) or link.parent
+        card = link.find_parent(["article", "li"]) or link.find_parent("div") or link.parent
         card_text = card.get_text(" ", strip=True) if card else ""
-        date_match = re.search(r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b", card_text)
-        event_start = _normalise_uk_date(date_match.group(0)) if date_match else None
+        event_start, event_end = _extract_event_dates(card_text)
 
         listings.append(
             Listing(
@@ -92,6 +125,7 @@ def parse_factory_international(
                 summary=card_text[:400],
                 posted_date=event_start,
                 event_start=event_start,
+                event_end=event_end,
                 cost=_detect_cost(card_text),
                 source_name=source.name,
                 source_url=urljoin(source.url, href),
@@ -111,13 +145,12 @@ def parse_manchester_digital(
     for link in soup.select("a[href*='/events/']"):
         title = link.get_text(" ", strip=True)
         href = str(link.get("href", ""))
-        if not title or len(title) < 4 or href.rstrip("/") == "/events":
+        if not title or len(title) < 4 or href.rstrip("/") == "/events" or _is_utility_event_link(title, href):
             continue
 
-        card = link.find_parent(["article", "li", "div"]) or link.parent
+        card = link.find_parent(["article", "li"]) or link.find_parent("div") or link.parent
         card_text = card.get_text(" ", strip=True) if card else ""
-        date_match = re.search(r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b", card_text)
-        event_start = _normalise_uk_date(date_match.group(0)) if date_match else None
+        event_start, event_end = _extract_event_dates(card_text)
 
         listings.append(
             Listing(
@@ -129,6 +162,7 @@ def parse_manchester_digital(
                 summary=card_text[:400],
                 posted_date=event_start,
                 event_start=event_start,
+                event_end=event_end,
                 cost=_detect_cost(card_text),
                 source_name=source.name,
                 source_url=urljoin(source.url, href),
