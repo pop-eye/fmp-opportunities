@@ -78,6 +78,7 @@ def parse_reed_api(
         rate_limit_seconds=source.rate_limit_seconds,
         auth=(api_key, ""),
         params=params,
+        check_robots=False,
     )
     data = json.loads(raw_text)
     listings: list[Listing] = []
@@ -135,6 +136,7 @@ def parse_adzuna_api(
         source.url,
         rate_limit_seconds=source.rate_limit_seconds,
         params=params,
+        check_robots=False,
     )
     data = json.loads(raw_text)
     listings: list[Listing] = []

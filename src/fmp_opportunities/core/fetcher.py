@@ -129,6 +129,7 @@ class PoliteFetcher:
         params: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
         use_cache: bool = True,
+        check_robots: bool = True,
     ) -> str:
         """Fetch URL text politely, using cache when fresh."""
         cache_key = url
@@ -141,7 +142,7 @@ class PoliteFetcher:
             if cached is not None:
                 return cached
 
-        if not self.is_allowed_by_robots(url):
+        if check_robots and not self.is_allowed_by_robots(url):
             raise PermissionError(f"Blocked by robots.txt: {url}")
 
         host = urlparse(url).netloc
