@@ -17,6 +17,10 @@
   const statusEl = document.getElementById("status-bar");
   const updatedEl = document.getElementById("last-updated");
   const listEl = document.getElementById("listings");
+  const mapDetails = document.getElementById("map-details");
+  const updateMap = mapDetails
+    ? OpportunityMap.setup(mapDetails, document.getElementById("map"), document.getElementById("map-status"))
+    : null;
 
   let allItems = [];
 
@@ -141,6 +145,7 @@
       statusEl.textContent = `Showing ${filtered.length} of ${allItems.length} listings.`;
     }
 
+    if (updateMap) updateMap(filtered);
     if (!listEl) return;
     if (filtered.length === 0) {
       listEl.innerHTML =
@@ -149,7 +154,7 @@
     }
 
     listEl.innerHTML = filtered
-      .map((item) => {
+      .map((item, index) => {
         const soon = isClosingSoon(item.closing_date);
         const badges = [];
         if (item.is_new) {
@@ -194,7 +199,7 @@
         }
 
         return `
-          <li class="card${soon ? " closing-soon" : ""}">
+          <li id="listing-${index}" class="card${soon ? " closing-soon" : ""}">
             <div class="card-header">
               <h2 class="card-title">
                 <a href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">

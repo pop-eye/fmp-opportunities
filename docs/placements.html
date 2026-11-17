@@ -60,10 +60,17 @@
         </div>
       </section>
 
+      <details id="map-details" class="map-section">
+        <summary>Show approximate locations on a map</summary>
+        <p>Markers show town or city centres, not exact addresses. Opening the map loads services from Leaflet and OpenStreetMap.</p>
+        <p id="map-status" role="status">Open the map to load it.</p>
+        <div id="map" class="map" aria-label="Approximate locations of placements"></div>
+      </details>
       <p id="status-bar" class="status-bar" aria-live="polite">Loading placements...</p>
       <ul id="listings" class="listings"></ul>
     </main>
   </div>
+  <script src="map.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

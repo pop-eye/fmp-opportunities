@@ -4,6 +4,8 @@ Weekly feeds of graduate jobs, placements, and creative industry events for BA F
 
 The project generates RSS 2.0 XML feeds, an iCalendar `.ics` file, JSON data files, and accessible static HTML pages in [docs/](docs/) for publishing via GitHub Pages and embedding inside Moodle.
 
+Each feed page has an optional map. Markers represent approximate centres of recognised towns and cities, and reflect the current filters. Remote listings and locations that are unknown, ambiguous, or outside the built in list remain in the results below the map. Opening the map loads Leaflet from unpkg and map tiles from OpenStreetMap. These services receive the visitor's IP address and normal browser request information. No geocoding service or location tracking is used. Tiles are subject to the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
+
 ## Project structure
 
 * [run.py](run.py): command line entry point.

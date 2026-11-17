@@ -241,3 +241,43 @@ select:focus-visible {
   border-radius: var(--radius);
   color: var(--muted);
 }
+
+.map-section {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.map-section summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.map-section p {
+  margin: 0.75rem 0;
+}
+
+.map {
+  height: 360px;
+  max-width: 100%;
+}
+
+.map-marker {
+  display: grid;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #0f4c81;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 1px 4px #333;
+}
+
+.map-section summary:focus-visible,
+.map a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
