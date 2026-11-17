@@ -8,6 +8,7 @@
   const jsonUrl = root.getAttribute("data-json") || `${tool}.json`;
 
   const searchInput = document.getElementById("filter-search");
+  const disciplineSelect = document.getElementById("filter-discipline");
   const locationSelect = document.getElementById("filter-location");
   const remoteCheckbox = document.getElementById("filter-remote");
   const typeSelect = document.getElementById("filter-type");
@@ -45,6 +46,24 @@
     });
   }
 
+  function populateDisciplineOptions(items) {
+    if (!disciplineSelect) return;
+    const disciplines = Array.from(
+      new Set(
+        items.flatMap((item) =>
+          Array.isArray(item.category_tags) ? item.category_tags : []
+        )
+      )
+    ).sort((a, b) => a.localeCompare(b));
+
+    disciplines.forEach((disc) => {
+      const opt = document.createElement("option");
+      opt.value = disc;
+      opt.textContent = disc;
+      disciplineSelect.appendChild(opt);
+    });
+  }
+
   function populateLocationOptions(items) {
     if (!locationSelect) return;
     const locations = Array.from(
@@ -74,6 +93,7 @@
 
   function render() {
     const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+    const selectedDiscipline = disciplineSelect ? disciplineSelect.value : "";
     const selectedLocation = locationSelect ? locationSelect.value : "";
     const remoteOnly = remoteCheckbox ? remoteCheckbox.checked : false;
     const selectedType = typeSelect ? typeSelect.value : "";
@@ -92,6 +112,12 @@
           .join(" ")
           .toLowerCase();
         if (!hay.includes(query)) return false;
+      }
+      if (
+        selectedDiscipline &&
+        !(Array.isArray(item.category_tags) && item.category_tags.includes(selectedDiscipline))
+      ) {
+        return false;
       }
       if (selectedLocation && (item.location || "") !== selectedLocation) {
         return false;
@@ -161,6 +187,11 @@
         if (item.source_name) {
           metaParts.push(`<span><strong>Source:</strong> ${escapeHtml(item.source_name)}</span>`);
         }
+        if (Array.isArray(item.category_tags) && item.category_tags.length > 0) {
+          metaParts.push(
+            `<span><strong>Disciplines:</strong> ${escapeHtml(item.category_tags.join(", "))}</span>`
+          );
+        }
 
         return `
           <li class="card${soon ? " closing-soon" : ""}">
@@ -181,7 +212,15 @@
   }
 
   function bindEvents() {
-    [searchInput, locationSelect, remoteCheckbox, typeSelect, paidSelect, dateRangeSelect].forEach(
+    [
+      searchInput,
+      disciplineSelect,
+      locationSelect,
+      remoteCheckbox,
+      typeSelect,
+      paidSelect,
+      dateRangeSelect,
+    ].forEach(
       (el) => {
         if (!el) return;
         el.addEventListener("input", render);
@@ -202,6 +241,7 @@
       if (updatedEl && data.last_updated) {
         updatedEl.textContent = `Last updated: ${formatDate(data.last_updated)}`;
       }
+      populateDisciplineOptions(allItems);
       populateLocationOptions(allItems);
       bindEvents();
       render();
