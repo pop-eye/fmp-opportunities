@@ -160,7 +160,7 @@
       const button = item.unique_id && storageAvailable
         ? `<button type="button" class="button button-secondary save-button" data-index="${index}" aria-pressed="${isSaved}">${isSaved ? "Saved" : "Save"}</button>`
         : "";
-      return `<li id="listing-${index}" class="card${ListingUtils.closingSoon(item) ? " closing-soon" : ""}">
+      return `<li id="listing-${index}" tabindex="-1" class="card${ListingUtils.closingSoon(item) ? " closing-soon" : ""}">
         <div class="card-header"><h2 class="card-title">${escapeHtml(item.title)}</h2><div class="badges">${badges}</div></div>
         <dl class="card-details">${meta}</dl>
         ${item.summary ? `<p class="card-summary">${escapeHtml(item.summary)}</p>` : ""}

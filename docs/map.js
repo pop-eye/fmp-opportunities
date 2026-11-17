@@ -15,6 +15,7 @@
     ["Chester", 53.1934, -2.8931],
     ["Preston", 53.7632, -2.7031],
     ["Blackpool", 53.8175, -3.0357],
+    ["Blackburn", 53.7486, -2.4875],
     ["Lancaster", 54.0470, -2.8010],
     ["Leeds", 53.8008, -1.5491],
     ["Sheffield", 53.3811, -1.4701],
@@ -31,11 +32,26 @@
     ["Cambridge", 52.2053, 0.1218],
   ];
 
+  const manchesterAreas = [
+    ["Rusholme", 53.4519, -2.2078],
+    ["Collyhurst", 53.4961, -2.2211],
+    ["Trafford Park", 53.4688, -2.3119],
+    ["Manchester Science Park", 53.4641, -2.2363],
+  ];
+
   function findPlace(item) {
     if (item.remote || typeof item.location !== "string") return null;
-    const location = item.location.toLowerCase().replace(/\bgreater manchester\b/g, "");
-    const matches = places.filter(([name]) =>
+    const location = item.location.toLowerCase().trim();
+    const area = manchesterAreas.find(([name]) =>
+      new RegExp(`^${name.toLowerCase()}(?:\\s*,\\s*manchester)?(?:\\s*,\\s*greater manchester)?$`).test(location)
+    );
+    if (area) return area;
+    if (manchesterAreas.some(([name]) =>
       new RegExp(`(^|[^a-z])${name.toLowerCase()}([^a-z]|$)`).test(location)
+    )) return null;
+    const cityLocation = location.replace(/\bgreater manchester\b/g, "");
+    const matches = places.filter(([name]) =>
+      new RegExp(`(^|[^a-z])${name.toLowerCase()}([^a-z]|$)`).test(cityLocation)
     );
     return matches.length === 1 ? matches[0] : null;
   }
@@ -74,7 +90,7 @@
           const entry = document.createElement("li");
           const link = document.createElement("a");
           link.href = `#listing-${index}`;
-          link.textContent = item.title;
+          link.textContent = `View listing: ${item.title}`;
           entry.appendChild(link);
           list.appendChild(entry);
         });
@@ -120,7 +136,7 @@
       });
       Promise.all([loadResource(css), loadResource(script)]).then(() => {
         loading = false;
-        map = global.L.map(mapElement, { scrollWheelZoom: false }).setView([53.48, -2.24], 6);
+        map = global.L.map(mapElement, { scrollWheelZoom: true, touchZoom: true }).setView([54.5, -3.5], 5);
         global.L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
