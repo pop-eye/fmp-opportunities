@@ -5,7 +5,7 @@
     <link>https://pop-eye.github.io/fmp-opportunities/events.html</link>
     <description>Upcoming industry talks, festivals, screenings, workshops, and open calls for MMU BA Future Media Production students.</description>
     <language>en-gb</language>
-    <lastBuildDate>Tue, 17 Nov 2026 20:45:28 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Nov 2026 20:51:53 +0000</lastBuildDate>
     <item>
       <title>RTS Midlands Industry Insights : Hair Make Up, Costume - bringing storytelling to life</title>
       <link>https://rts.org.uk/events/rts-midlands-industry-insights-hair-make-costume-bringing-storytelling-life</link>
@@ -17,6 +17,19 @@ Type: event
 When: 2026-11-17
 
 Midlands RTS Midlands Industry Insights : Hair Make Up, Costume - bringing storytelling to life Birmingham Date 17 November 2026</description>
+    </item>
+    <item>
+      <title>What's Funny About... 50 Years of Satire on TV</title>
+      <link>https://rts.org.uk/events/whats-funny-about-50-years-satire-tv</link>
+      <guid isPermaLink="false">0543bc1f48871511</guid>
+      <pubDate>Tue, 17 Nov 2026 00:00:00 +0000</pubDate>
+      <description>Organisation: Royal Television Society
+Location: London
+Type: event
+Disciplines: Broadcast and Producing
+When: 2026-11-17
+
+London What's Funny About... 50 Years of Satire on TV London Date 17 November 2026</description>
     </item>
     <item>
       <title>North West Awards 2026</title>
@@ -156,6 +169,18 @@ Cost: Free
 Prehistoric Planet: Discovering Dinosaurs Stand face-to-face with the greatest dinosaurs in history on a colossal adventure through time</description>
     </item>
     <item>
+      <title>Pitching Skills Workshop with Jon Torrens</title>
+      <link>https://www.eventbrite.co.uk/e/pitching-skills-workshop-with-jon-torrens-tickets-2002435389153</link>
+      <guid isPermaLink="false">357dfce0bc5f0d62</guid>
+      <pubDate>Wed, 09 Dec 2026 00:00:00 +0000</pubDate>
+      <description>Organisation: UKIE (Games &amp; Interactive)
+Location: London
+Type: event
+When: 2026-12-09
+
+December 9, 2026 Ukie Friends Festive Drinks 2026 We'd like to invite all friends of Ukie to our annual festive drinks at our office in London on Wednesday 9th December! Read More February 3, 2027 Pitching Skills Workshop with Jon Torrens Join Jon Torrens for a half-day workshop and learn how to pitch with confidence! Read More February 11, 2027 Ukie Conference 2027 The Ukie Conference 2027 unites</description>
+    </item>
+    <item>
       <title>Hetain Patel: Come As You Really Are</title>
       <link>https://factoryinternational.org/whats-on/hetain-patel-come-as-you-really-are/</link>
       <guid isPermaLink="false">a07e13236083b391</guid>
@@ -276,18 +301,6 @@ Location: UK
 Type: event
 
 Previous events Look back at previous RTS events Off</description>
-    </item>
-    <item>
-      <title>What's Funny About... 50 Years of Satire on TV</title>
-      <link>https://rts.org.uk/events/whats-funny-about-50-years-satire-tv</link>
-      <guid isPermaLink="false">0543bc1f48871511</guid>
-      <pubDate>Tue, 17 Nov 2026 20:45:28 +0000</pubDate>
-      <description>Organisation: Royal Television Society
-Location: UK
-Type: event
-Disciplines: Broadcast and Producing
-
-What's Funny About... 50 Years of Satire on TV Five Decades of Satire with Four Comedy Legends.</description>
     </item>
   </channel>
 </rss>
