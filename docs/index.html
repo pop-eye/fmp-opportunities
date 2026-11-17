@@ -7,11 +7,13 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <div class="container">
     <header class="page-header hero">
-      <p class="eyebrow">FMP Opportunities</p>
-      <h1>Find your next creative opportunity</h1>
-      <p>Jobs, placements and events for Future Media Production students. Explore creative media, digital arts, social media and technology.</p>
+      <p class="eyebrow">FMP / Opportunities</p>
+      <p class="hero-label">Ideas into action <span aria-hidden="true">✳</span> Creative futures</p>
+      <h1>Find your next <span class="hero-highlight">creative opportunity.</span></h1>
+      <p class="hero-intro">Jobs, placements and events for Future Media Production students. Explore creative media, digital arts, social media and technology.</p>
       <nav class="nav-links" aria-label="Opportunity feeds">
         <a href="index.html" aria-current="page">Home</a>
         <a href="jobs.html">Jobs</a>
@@ -19,10 +21,17 @@
         <a href="events.html">Events</a>
       </nav>
     </header>
-    <main>
-      <h2>Where would you like to start?</h2>
+    <main id="main-content">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Your next move starts here</p>
+          <h2>Find your thing.</h2>
+        </div>
+        <p>Pick a starting point and see what's out there.</p>
+      </div>
       <ul class="home-grid">
         <li class="card home-card">
+          <p class="card-label" aria-hidden="true">01 / Get hired</p>
           <h3 class="card-title">Graduate and entry level jobs</h3>
           <p>Start your career in production, design, social media and creative technology.</p>
           <p id="count-jobs" class="home-count" role="status">Loading opportunities</p>
@@ -30,6 +39,7 @@
           <div class="quick-links"><a href="jobs.html?view=new">New jobs</a><a href="jobs.html?view=closing">Closing soon</a><a href="jobs.html?view=saved">Saved jobs</a></div>
         </li>
         <li class="card home-card">
+          <p class="card-label" aria-hidden="true">02 / Get experience</p>
           <h3 class="card-title">Placements and internships</h3>
           <p>Build your skills with opportunities during or after your studies.</p>
           <p id="count-placements" class="home-count" role="status">Loading opportunities</p>
@@ -37,6 +47,7 @@
           <div class="quick-links"><a href="placements.html?view=new">New placements</a><a href="placements.html?view=closing">Closing soon</a><a href="placements.html?view=saved">Saved placements</a></div>
         </li>
         <li class="card home-card">
+          <p class="card-label" aria-hidden="true">03 / Get connected</p>
           <h3 class="card-title">Creative and digital events</h3>
           <p>Meet people and discover talks, workshops, screenings and festivals.</p>
           <p id="count-events" class="home-count" role="status">Loading opportunities</p>

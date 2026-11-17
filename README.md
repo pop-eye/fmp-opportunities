@@ -4,9 +4,13 @@ Weekly feeds of graduate jobs, placements, and creative industry events for BA F
 
 The project generates RSS 2.0 XML feeds, an iCalendar `.ics` file, JSON data files, and accessible static HTML pages in [docs/](docs/) for publishing via GitHub Pages and embedding inside Moodle.
 
+The website's colours and layout can be adjusted using the variables at the top of [docs/styles.css](docs/styles.css).
+
 Each feed page has an optional map. Markers represent approximate centres of recognised towns, cities and some Manchester neighbourhoods, and reflect the current filters. Select a marker and then a listing to view it on the page. Use the mouse wheel, pinch gestures or the map buttons to zoom. Remote listings and locations that are unknown, ambiguous, or outside the built in list remain in the results below the map. Opening the map loads Leaflet from unpkg and map tiles from OpenStreetMap. These services receive the visitor's IP address and normal browser request information. No geocoding service or location tracking is used. Tiles are subject to the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
 
 Students can search, filter and sort each feed, or save listings in their browser. They can find saved listings using the saved links on the home page or each feed page, or the Saved only filter. Saved listing identifiers stay on that device and are not sent to a server. They can disappear if browser data is cleared or the listing is no longer available. If browser storage is blocked, the page reports that saving is unavailable. The website hides listings with known past dates between updates, but dates and availability can be missing or change. Students should check the original source.
+
+The placements feed searches the Reed API across creative disciplines and includes relevant internships from the gamesJobs RSS feed. Reed requires `REED_API_KEY`; gamesJobs permits light, polite RSS access, and its feed is limited to recent entries. The placements page also links to Higherin, Channel 4, Sky and Prospects for manual browsing. Those links are not automatically imported, and the availability and eligibility of individual programmes must be checked on the original sites.
 
 ## Project structure
 

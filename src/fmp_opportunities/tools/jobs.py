@@ -9,14 +9,14 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
-from fmp_opportunities.core.fetcher import PoliteFetcher, _strip_html
+from fmp_opportunities.core.fetcher import PoliteFetcher, _strip_html, parse_rss_feed
 from fmp_opportunities.core.filter import LLMClassifierHook
-from fmp_opportunities.core.models import Listing
+from fmp_opportunities.core.models import Listing, compute_unique_id
 from fmp_opportunities.core.pipeline import PipelineResult, run_tool_pipeline
 
 logger = logging.getLogger(__name__)
@@ -69,10 +69,11 @@ def parse_reed_api(
 
     params = {
         "keywords": keywords,
-        "locationName": location,
-        "distanceFromLocation": distance,
         "resultsToTake": results_to_take,
     }
+    if location:
+        params["locationName"] = location
+        params["distanceFromLocation"] = distance
     raw_text = fetcher.get_text(
         source.url,
         rate_limit_seconds=source.rate_limit_seconds,
@@ -91,6 +92,13 @@ def parse_reed_api(
         desc = _strip_html(str(item.get("jobDescription", "")))
         posted = _normalise_uk_date(item.get("date"))
         closing = _normalise_uk_date(item.get("expirationDate"))
+        salary_stated = any(
+            isinstance(item.get(key), (int, float))
+            and not isinstance(item.get(key), bool)
+            and item[key] > 0
+            for key in ("minimumSalary", "maximumSalary")
+        )
+        unpaid = re.search(r"\b(?:unpaid|voluntary|expenses only)\b", desc, re.IGNORECASE)
         listings.append(
             Listing(
                 title=title,
@@ -101,6 +109,7 @@ def parse_reed_api(
                 summary=desc[:500],
                 posted_date=posted,
                 closing_date=closing,
+                paid="paid" if salary_stated and not unpaid else None,
                 source_name=source.name,
                 source_url=job_url,
             )
@@ -166,6 +175,53 @@ def parse_adzuna_api(
     return listings
 
 
+def _creative_access_details(link: Tag) -> tuple[str, str, bool, Optional[str], str]:
+    card = link.find_parent(class_="jcl-job-teaser-content")
+    if not isinstance(card, Tag):
+        card = next(
+            (
+                parent for parent in link.parents
+                if isinstance(parent, Tag)
+                and len(parent.select("a[href^='/job/']")) == 1
+                and parent.select_one("a[href^='/organization/']")
+            ),
+            link.parent,
+        )
+    if not isinstance(card, Tag):
+        return "", "", False, None, ""
+
+    org_link = card.select_one("a[href^='/organization/']")
+    organisation = org_link.get_text(" ", strip=True) if org_link else ""
+    location_node = card.select_one(".jcl-molecules-popover-list__single-item")
+    location = location_node.get_text(" ", strip=True) if location_node else ""
+    lines = [line.strip() for line in card.get_text("\n", strip=True).splitlines() if line.strip()]
+    remote = False
+    closing_date = None
+    date_node = card.select_one(".jcl-organisms-job-teaser__job-teaser-date")
+    if date_node:
+        date_match = re.search(r"\b\d{1,2}/\d{1,2}/\d{4}\b", date_node.get_text(" ", strip=True))
+        closing_date = _normalise_uk_date(date_match.group()) if date_match else None
+        if closing_date is None:
+            logger.warning("Could not extract closing date for Creative Access listing %r", link.get_text(" ", strip=True))
+    pay_text = ""
+    for line in lines:
+        lower = line.lower()
+        expiry = re.match(r"^expires\s*:\s*(.+)$", line, re.IGNORECASE)
+        if expiry:
+            closing_date = _normalise_uk_date(expiry.group(1))
+        elif "£" in line or "per hour" in lower or "per year" in lower:
+            pay_text = line
+        elif lower == "remote":
+            remote = True
+            if not location:
+                location = line
+        elif not location and any(
+            loc in lower for loc in ("uk", "manchester", "salford", "london", "bristol", "leeds")
+        ) and line != organisation:
+            location = line
+    return organisation, location, remote, closing_date, pay_text
+
+
 def parse_creative_access(
     source: SourceConfig, body: str, _fetcher: PoliteFetcher
 ) -> list[Listing]:
@@ -178,31 +234,12 @@ def parse_creative_access(
         href = link.get("href", "")
         if not title or not href:
             continue
-        card = link.find_parent(["article", "div", "li"]) or link.parent
-        card_text = card.get_text("\n", strip=True) if card else ""
-        lines = [line.strip() for line in card_text.splitlines() if line.strip()]
-
-        org_link = card.select_one("a[href^='/organization/']") if card else None
-        organisation = org_link.get_text(" ", strip=True) if org_link else ""
-
-        closing_date = None
-        location = "UK"
-        remote = False
-        for line in lines:
-            if line.lower().startswith("expires:"):
-                raw_date = line.split(":", 1)[1].strip()
-                closing_date = _normalise_uk_date(raw_date)
-            elif "remote" in line.lower():
-                remote = True
-                if location == "UK":
-                    location = line
-            elif any(uk_loc in line.lower() for uk_loc in ("uk", "manchester", "london", "bristol", "hybrid")):
-                location = line
+        organisation, location, remote, closing_date, _ = _creative_access_details(link)
 
         listings.append(
             Listing(
                 title=title,
-                organisation=organisation or "Creative Access Employer",
+                organisation=organisation,
                 location=location,
                 remote=remote,
                 type="job",
@@ -214,6 +251,45 @@ def parse_creative_access(
         )
 
     return listings
+
+
+def parse_gamesjobs_feed(
+    source: SourceConfig, body: str, fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Parse gamesJobs RSS descriptions while retaining direct employer links."""
+    listings = parse_rss_feed(source, body, fetcher)
+    parsed: list[Listing] = []
+    for item in listings:
+        host = (urlparse(item.source_url).hostname or "").lower()
+        if any(host == domain or host.endswith("." + domain) for domain in ("linkedin.com", "indeed.com", "indeed.co.uk")):
+            logger.info("Skipping %s: excluded source domain %s", item.title, host)
+            continue
+        parts = [part.strip() for part in re.split(r"\s+[–—]\s+|\s+·\s+", item.summary)]
+        if len(parts) >= 3:
+            organisation, location = parts[:2]
+            for separator in (" – ", " — "):
+                suffix = f"{separator}{organisation}"
+                if item.title.endswith(suffix):
+                    item.title = item.title[:-len(suffix)]
+                    break
+            item.organisation = organisation
+            item.location = location
+            item.remote = "remote" in location.lower()
+            item.unique_id = compute_unique_id(item.source_url, item.title, item.organisation)
+        else:
+            logger.warning("Could not extract employer and location from gamesJobs listing %r", item.title)
+            item.organisation = ""
+            item.location = ""
+            item.unique_id = compute_unique_id(item.source_url, item.title, item.organisation)
+        if source.options.get("entry_level_only") and not re.search(
+            r"\b(junior|graduate|intern(?:ship)?|placement|trainee|traineeship|apprentice|assistant|entry[ -]level)\b",
+            item.title,
+            re.IGNORECASE,
+        ):
+            logger.info("DROP [jobs] %s: no entry level role indicated in the title", item.title)
+            continue
+        parsed.append(item)
+    return parsed
 
 
 def parse_artsjobs(

@@ -17,6 +17,7 @@ from fmp_opportunities.tools.jobs import (
     parse_adzuna_api,
     parse_artsjobs,
     parse_creative_access,
+    parse_gamesjobs_feed,
     parse_reed_api,
     run_jobs,
 )
@@ -134,6 +135,20 @@ def test_parse_creative_access_and_artsjobs(tmp_path: Path) -> None:
     assert aj_items[0].posted_date == "2026-11-17"
 
 
+def test_gamesjobs_entry_level_filter(tmp_path: Path) -> None:
+    xml = """<rss><channel>
+      <item><title>Junior Animator — Studio</title><link>https://example.com/1</link>
+        <description>Studio — Manchester · Animation</description></item>
+      <item><title>Animator — Studio</title><link>https://example.com/2</link>
+        <description>Studio — Manchester · Animation</description></item>
+    </channel></rss>"""
+    source = SourceConfig(name="gamesJobs", type="rss", url="https://gamesjobs.co.uk/feed.xml",
+                          options={"entry_level_only": True})
+    items = parse_gamesjobs_feed(source, xml, StubFetcher({}, tmp_path))
+    assert [item.title for item in items] == ["Junior Animator"]
+    assert items[0].organisation == "Studio"
+
+
 def test_filter_dedup_and_sort() -> None:
     kw = KeywordsConfig(
         include={"video production": 2.0, "manchester": 1.5, "junior": 1.0},
@@ -228,6 +243,29 @@ def test_refreshed_expired_listing_does_not_restore_old_state() -> None:
     result, stats = reconcile_state("jobs", [refreshed], state, now_iso="2026-11-17T12:00:00Z")
     assert result == []
     assert stats["removed_count"] == 1
+
+
+def test_refreshed_employer_preserves_saved_id_and_does_not_duplicate() -> None:
+    previous = Listing(
+        title="Trainee researcher", organisation="Creative Access Employer",
+        location="UK", source_url="https://example.com/job/1",
+        first_seen="2026-11-10T12:00:00Z", last_seen="2026-11-16T12:00:00Z",
+    )
+    refreshed = Listing(
+        title="Trainee researcher", organisation="BBC Studios",
+        location="Bristol", source_url="https://example.com/job/1",
+        closing_date="2026-12-01",
+    )
+    state = {"placements": {"items": {previous.unique_id: previous.to_dict()}}}
+    result, stats = reconcile_state("placements", [refreshed], state, now_iso="2026-11-17T12:00:00Z")
+    assert len(result) == 1
+    assert result[0].organisation == "BBC Studios"
+    assert result[0].unique_id == previous.unique_id
+    assert result[0].first_seen == previous.first_seen
+    assert stats["added_count"] == 0
+    refreshed.closing_date = "2026-11-16"
+    expired, _ = reconcile_state("placements", [refreshed], state, now_iso="2026-11-17T12:00:00Z")
+    assert expired == []
 
 
 def test_run_jobs_end_to_end(tmp_path: Path) -> None:

@@ -44,6 +44,15 @@ jobs:
     rate_limit_seconds: 2.0
     notes: robots.txt allows /jobs. UK arts and creative sector listings.
 
+  - name: gamesJobs
+    type: rss
+    url: https://gamesjobs.co.uk/feed.xml
+    enabled: true
+    parser: fmp_opportunities.tools.jobs:parse_gamesjobs_feed
+    rate_limit_seconds: 2.0
+    options: {entry_level_only: true}
+    notes: UK games industry RSS. Terms welcome light automated feed access.
+
   - name: Prolific North
     type: html
     url: https://www.prolificnorth.co.uk/jobs/
@@ -52,6 +61,131 @@ jobs:
     notes: Disabled by default because Cloudflare returns HTTP 403 to automated requests.
 
 placements:
+  - name: Reed Media Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: media internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Video Placements
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: video placement, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Content Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: content internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Marketing Placements
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: marketing placement, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Design Placements
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: design placement, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Games Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: games internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Creative Technology Placements
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: creative technology placement, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Audio Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: audio internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Film Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: film internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Social Media Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: social media internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed UX Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: UX internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Animation Internships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: animation internship, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: Reed Broadcast Placements
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_reed_placements
+    rate_limit_seconds: 1.0
+    options: {keywords: broadcast placement, locationName: "", resultsToTake: 100}
+    notes: Official API. Requires REED_API_KEY.
+
+  - name: gamesJobs Internships
+    type: rss
+    url: https://gamesjobs.co.uk/feed.xml
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_gamesjobs_placements
+    rate_limit_seconds: 2.0
+    notes: UK games industry RSS; only relevant placements and internships are retained.
+
   - name: Creative Access Internships
     type: html
     url: https://opportunities.creativeaccess.org.uk/jobs/internship-traineeship

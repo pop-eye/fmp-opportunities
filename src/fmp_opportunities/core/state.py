@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
+from fmp_opportunities.core.dedup import canonicalise_url
 from fmp_opportunities.core.models import Listing, utc_now_iso
 from fmp_opportunities.core.writers import parse_iso_datetime
 
@@ -78,12 +79,25 @@ def reconcile_state(
     }
 
     merged_by_id: dict[str, Listing] = {}
-    fresh_ids = {item.unique_id for item in fresh_listings}
+    previous_by_url: dict[str, list[Listing]] = {}
+    for previous in previous_by_id.values():
+        url = canonicalise_url(previous.source_url)
+        if url:
+            previous_by_url.setdefault(url, []).append(previous)
+    fresh_urls = {canonicalise_url(item.source_url) for item in fresh_listings if item.source_url}
+    fresh_ids: set[str] = set()
     added_count = 0
 
     for item in fresh_listings:
         uid = item.unique_id
         prev = previous_by_id.get(uid)
+        if prev is None and item.source_url:
+            matches = previous_by_url.get(canonicalise_url(item.source_url), [])
+            if len(matches) == 1:
+                prev = matches[0]
+                uid = prev.unique_id
+                item.unique_id = uid
+        fresh_ids.add(uid)
         if prev is not None:
             item.first_seen = prev.first_seen or timestamp
         else:
@@ -99,7 +113,7 @@ def reconcile_state(
 
     # Retain unexpired previous items that were not seen in this run up to stale_after_days
     for uid, prev in previous_by_id.items():
-        if uid in fresh_ids:
+        if uid in fresh_ids or (prev.source_url and canonicalise_url(prev.source_url) in fresh_urls):
             continue
         if is_expired(prev, today=today):
             continue

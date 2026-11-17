@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 from pathlib import Path
 from typing import Optional
@@ -11,16 +12,23 @@ from bs4 import BeautifulSoup
 
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
 from fmp_opportunities.core.fetcher import PoliteFetcher
-from fmp_opportunities.core.filter import LLMClassifierHook
+from fmp_opportunities.core.filter import DISCIPLINE_RULES, LLMClassifierHook, assign_discipline_tags
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.core.pipeline import PipelineResult, run_tool_pipeline
-from fmp_opportunities.tools.jobs import NORTH_WEST_TERMS, _normalise_uk_date
+from fmp_opportunities.tools.jobs import (
+    NORTH_WEST_TERMS,
+    _creative_access_details,
+    parse_gamesjobs_feed,
+    parse_reed_api,
+)
 
 PLACEMENT_TYPES = (
     "sandwich year",
     "graduate scheme or internship (after study)",
     "short term placement (weeks to months)",
 )
+
+logger = logging.getLogger(__name__)
 
 
 def classify_placement_type(
@@ -93,36 +101,12 @@ def parse_creative_access_placements(
         if not title or not href:
             continue
 
-        card = link.find_parent(["article", "div", "li"]) or link.parent
-        card_text = card.get_text("\n", strip=True) if card else ""
-        lines = [line.strip() for line in card_text.splitlines() if line.strip()]
-
-        org_link = card.select_one("a[href^='/organization/']") if card else None
-        organisation = org_link.get_text(" ", strip=True) if org_link else ""
-
-        closing_date = None
-        location = "UK"
-        remote = False
-        pay_text = ""
-
-        for line in lines:
-            lower = line.lower()
-            if lower.startswith("expires:"):
-                closing_date = _normalise_uk_date(line.split(":", 1)[1].strip())
-            elif "£" in line or "per hour" in lower or "per year" in lower:
-                pay_text = line
-            elif "remote" in lower:
-                remote = True
-                if location == "UK":
-                    location = line
-            elif any(loc in lower for loc in ("uk", "manchester", "salford", "london", "bristol", "leeds", "hybrid")):
-                location = line
-
-        summary = f"Creative Access placement. {location}. {pay_text}".strip()
+        organisation, location, remote, closing_date, pay_text = _creative_access_details(link)
+        summary = " ".join(part for part in (location, pay_text) if part)
         listings.append(
             Listing(
                 title=title,
-                organisation=organisation or "Creative Access Employer",
+                organisation=organisation,
                 location=location,
                 remote=remote,
                 type=classify_placement_type(title, summary),
@@ -135,6 +119,41 @@ def parse_creative_access_placements(
         )
 
     return listings
+
+
+def _placement_candidates(listings: list[Listing]) -> list[Listing]:
+    candidates = []
+    for item in listings:
+        if not re.search(
+            r"\b(intern(?:ship)?|placement|sandwich|year in industry|traineeship|graduate (?:scheme|programme|program))\b",
+            item.title,
+            re.IGNORECASE,
+        ):
+            logger.info("DROP [placements] %s: title does not identify a placement or internship", item.title)
+            continue
+        tags = assign_discipline_tags(item).category_tags
+        if not any(tag in DISCIPLINE_RULES for tag in tags) and not re.search(
+            r"\bcreative production\b", f"{item.title} {item.summary}", re.IGNORECASE
+        ):
+            logger.info("DROP [placements] %s: no relevant creative discipline identified", item.title)
+            continue
+        item.type = classify_placement_type(item.title, item.summary)
+        candidates.append(item)
+    return candidates
+
+
+def parse_reed_placements(
+    source: SourceConfig, body: str, fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Fetch relevant placement and internship results from the Reed API."""
+    return _placement_candidates(parse_reed_api(source, body, fetcher))
+
+
+def parse_gamesjobs_placements(
+    source: SourceConfig, body: str, fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Select placement and internship opportunities from gamesJobs RSS."""
+    return _placement_candidates(parse_gamesjobs_feed(source, body, fetcher))
 
 
 def parse_prospects(

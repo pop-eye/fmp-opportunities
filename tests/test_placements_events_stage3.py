@@ -26,6 +26,8 @@ from fmp_opportunities.tools.placements import (
     classify_placement_type,
     detect_paid_status,
     parse_creative_access_placements,
+    parse_gamesjobs_placements,
+    parse_reed_placements,
     run_placements,
 )
 
@@ -59,6 +61,86 @@ def test_placement_classification_and_pay_detection() -> None:
     assert detect_paid_status("£24,000 per year") == "paid"
     assert detect_paid_status("Unpaid volunteer opportunity") == "unpaid"
     assert detect_paid_status("Join our studio team") is None
+
+
+def test_creative_access_nested_cards_extract_real_details(tmp_path: Path) -> None:
+    html = """
+    <div class="jcl-job-teaser-content">
+      <div class="jcl-job-teaser-title"><a href="/job/trainee">Trainee researcher</a></div>
+      <div><a href="/organization/bbc">BBC Studios</a></div>
+      <span class="jcl-molecules-popover-list__single-item">Bristol, UK</span>
+      <div class="jcl-job-teaser-remote">Hybrid</div>
+      <div class="jcl-organisms-job-teaser__job-teaser-date">
+        <span>Expires</span><span>Expires</span><span>:</span><time>01/12/2099</time>
+      </div><div>£20,441 per year</div>
+    </div>
+    <div class="jcl-job-teaser-content">
+      <div><a href="/job/creative">Emerging creative</a></div>
+      <div><a href="/organization/walk">Walk the Plank</a></div>
+      <span class="jcl-molecules-popover-list__single-item">Salford, UK</span>
+      <div>Expires: 26/11/2099</div><div>£29,215 per year</div>
+    </div>
+    """
+    source = SourceConfig(name="Creative Access", type="html", url="https://opportunities.creativeaccess.org.uk/jobs")
+    items = parse_creative_access_placements(source, html, StubFetcher({}, tmp_path))
+    assert [(item.organisation, item.location) for item in items] == [
+        ("BBC Studios", "Bristol, UK"),
+        ("Walk the Plank", "Salford, UK"),
+    ]
+    assert items[0].closing_date == "2099-12-01"
+    assert items[0].paid == "paid"
+    assert items[0].remote is False
+    assert items[1].closing_date == "2099-11-26"
+
+
+def test_reed_placements_filter_and_national_search(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("REED_API_KEY", "test-key")
+    payload = json.dumps({"results": [
+        {"jobTitle": "Social Media Internship", "employerName": "Studio", "locationName": "Salford",
+         "jobDescription": "Social media campaigns", "jobUrl": "https://example.com/1",
+         "minimumSalary": 22000},
+        {"jobTitle": "Finance Internship", "employerName": "Finance Co", "locationName": "UK",
+         "jobDescription": "Accountancy", "jobUrl": "https://example.com/2"},
+        {"jobTitle": "Marketing Manager", "employerName": "Studio", "locationName": "UK",
+         "jobDescription": "Marketing", "jobUrl": "https://example.com/3"},
+    ]})
+
+    class CapturingFetcher(StubFetcher):
+        params: dict = {}
+
+        def get_text(self, url: str, **kwargs) -> str:
+            self.params = kwargs["params"]
+            return super().get_text(url, **kwargs)
+
+    fetcher = CapturingFetcher({"reed.co.uk": payload}, tmp_path)
+    source = SourceConfig(name="Reed", type="api", url="https://www.reed.co.uk/api/1.0/search",
+                          options={"keywords": "social media internship", "locationName": ""})
+    items = parse_reed_placements(source, "", fetcher)
+    assert [item.title for item in items] == ["Social Media Internship"]
+    assert items[0].type == "short term placement (weeks to months)"
+    assert items[0].paid == "paid"
+    assert fetcher.params["keywords"] == "social media internship"
+    assert "locationName" not in fetcher.params
+    assert "distanceFromLocation" not in fetcher.params
+
+
+def test_gamesjobs_placements_use_employer_location_and_exclude_other_roles(tmp_path: Path) -> None:
+    xml = """<rss><channel>
+      <item><title>Creative Production Intern — EA Guildford</title>
+        <link>https://jobs.ea.com/job/1</link>
+        <description>EA Guildford — Manchester, United Kingdom · Product &amp; Publishing</description></item>
+      <item><title>Junior Animator – Studio</title><link>https://example.com/2</link>
+        <description>Studio – London – Animation</description></item>
+      <item><title>Marketing Internship – Studio</title><link>https://www.linkedin.com/jobs/3</link>
+        <description>Studio – London – Marketing</description></item>
+    </channel></rss>"""
+    source = SourceConfig(name="gamesJobs", type="rss", url="https://gamesjobs.co.uk/feed.xml")
+    items = parse_gamesjobs_placements(source, xml, StubFetcher({}, tmp_path))
+    assert len(items) == 1
+    assert (items[0].title, items[0].organisation, items[0].location) == (
+        "Creative Production Intern", "EA Guildford", "Manchester, United Kingdom"
+    )
+    assert items[0].posted_date is None
 
 
 def test_run_placements_end_to_end(tmp_path: Path) -> None:
