@@ -251,7 +251,7 @@ def run_placements(
         channel_link=channel_link,
         channel_description=(
             "Sandwich year placements, graduate schemes, and short term creative "
-            "media internships for MMU BA Future Media Production students."
+            "media internships for Future Media Production students."
         ),
         fetcher=fetcher,
         normalise_fn=normalise_placement,

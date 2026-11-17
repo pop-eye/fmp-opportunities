@@ -368,7 +368,7 @@ def run_events(
         channel_link=channel_link,
         channel_description=(
             "Upcoming industry talks, festivals, screenings, workshops, and open "
-            "calls for MMU BA Future Media Production students."
+            "calls for Future Media Production students."
         ),
         fetcher=fetcher,
         normalise_fn=normalise_event,

@@ -144,8 +144,7 @@ def write_combined_rss(
         channel_title="FMP Opportunities (All)",
         channel_link=channel_link,
         channel_description=(
-            "Combined jobs, placements, and events for BA Future Media Production "
-            "students at Manchester Metropolitan University."
+            "Combined jobs, placements, and events for Future Media Production students."
         ),
         build_time=build_time,
     )
@@ -162,7 +161,7 @@ def write_ics(
     path.parent.mkdir(parents=True, exist_ok=True)
 
     cal = Calendar()
-    cal.add("prodid", "-//MMU FMP//FMP Opportunities//EN")
+    cal.add("prodid", "-//FMP Opportunities//FMP Opportunities//EN")
     cal.add("version", "2.0")
     cal.add("calscale", "GREGORIAN")
     cal.add("x-wr-calname", calendar_name)

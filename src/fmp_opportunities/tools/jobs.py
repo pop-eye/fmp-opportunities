@@ -316,7 +316,7 @@ def run_jobs(
         channel_link=channel_link,
         channel_description=(
             "Graduate and entry level creative media, digital arts, and creative "
-            "technology roles for MMU BA Future Media Production students."
+            "technology roles for Future Media Production students."
         ),
         fetcher=fetcher,
         normalise_fn=normalise_job,
