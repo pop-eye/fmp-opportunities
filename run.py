@@ -9,7 +9,11 @@ from pathlib import Path
 from typing import Sequence
 
 from fmp_opportunities.core.config import load_keywords, load_sources
-from fmp_opportunities.core.llm import DEFAULT_LLAMA_ENDPOINT, create_llama_cpp_hook
+from fmp_opportunities.core.llm import (
+    DEFAULT_LLAMA_ENDPOINT,
+    DEFAULT_LLM_MODEL,
+    create_llama_cpp_hook,
+)
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.core.ops import (
     has_failures,
@@ -108,7 +112,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--llm-url",
         default=DEFAULT_LLAMA_ENDPOINT,
-        help="OpenAI compatible llama.cpp server chat completions URL.",
+        help="OpenAI compatible llama.cpp or Ollama chat completions URL.",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default=DEFAULT_LLM_MODEL,
+        help="Model name for --use-llm (default: llama3.2:3b).",
     )
     return parser.parse_args(argv)
 
@@ -120,7 +129,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger = logging.getLogger("fmp_opportunities.run")
 
     base_url = args.site_url.rstrip("/")
-    llm_hook = create_llama_cpp_hook(endpoint=args.llm_url) if args.use_llm else None
+    llm_hook = (
+        create_llama_cpp_hook(endpoint=args.llm_url, model=args.llm_model)
+        if args.use_llm
+        else None
+    )
     results_by_tool: dict[str, list[Listing]] = {}
     pipeline_results: list[PipelineResult] = []
     unexpected_error: str | None = None

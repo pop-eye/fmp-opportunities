@@ -13,7 +13,8 @@ from fmp_opportunities.core.models import Listing
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_LLAMA_ENDPOINT = "http://localhost:8080/v1/chat/completions"
+DEFAULT_LLAMA_ENDPOINT = "http://127.0.0.1:11434/v1/chat/completions"
+DEFAULT_LLM_MODEL = "llama3.2:3b"
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -36,9 +37,10 @@ def _extract_json(text: str) -> dict[str, Any]:
 
 def create_llama_cpp_hook(
     endpoint: str = DEFAULT_LLAMA_ENDPOINT,
+    model: str = DEFAULT_LLM_MODEL,
     timeout_seconds: int = 30,
 ) -> LLMClassifierHook:
-    """Return an LLMClassifierHook backed by a local llama.cpp server."""
+    """Return an LLMClassifierHook backed by a local llama.cpp or Ollama server."""
 
     def _classify(listing: Listing, tool: str) -> dict[str, Any]:
         placement_instruction = ""
@@ -67,7 +69,7 @@ def create_llama_cpp_hook(
         resp = requests.post(
             endpoint,
             json={
-                "model": "local",
+                "model": model,
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.1,
                 "max_tokens": 120,
