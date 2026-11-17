@@ -10,6 +10,7 @@
   <div class="container" data-tool="events" data-json="events.json">
     <header class="page-header">
       <h1>Creative and Digital Events</h1>
+      <p>Meet people, learn new skills and discover creative work.</p>
       <div class="meta-row">
         <span id="last-updated">Last updated: loading</span>
         <a href="events.xml">RSS Feed (events.xml)</a>
@@ -29,6 +30,9 @@
           <label for="filter-search">Search keywords</label>
           <input id="filter-search" type="search" placeholder="Event, venue, topic">
         </div>
+        <details id="more-filters" class="more-filters">
+          <summary>Filters and sorting</summary>
+          <div class="filter-grid">
         <div class="control-group">
           <label for="filter-discipline">Discipline</label>
           <select id="filter-discipline">
@@ -49,8 +53,37 @@
             <option value="">All locations</option>
           </select>
         </div>
+        <div class="checkbox-group">
+          <input id="filter-northwest" type="checkbox">
+          <label for="filter-northwest">Manchester and North West</label>
+        </div>
+        <div class="checkbox-group">
+          <input id="filter-remote" type="checkbox">
+          <label for="filter-remote">Online only</label>
+        </div>
+        <div class="checkbox-group">
+          <input id="filter-new" type="checkbox">
+          <label for="filter-new">New this week</label>
+        </div>
+        <div class="checkbox-group">
+          <input id="filter-saved" type="checkbox">
+          <label for="filter-saved">Saved only</label>
+        </div>
+        <div class="control-group">
+          <label for="sort-order">Sort by</label>
+          <select id="sort-order">
+            <option value="recommended">Recommended</option>
+            <option value="newest">Newest</option>
+            <option value="event">Event date</option>
+          </select>
+        </div>
+        <button id="reset-filters" type="button" class="button button-secondary">Clear filters</button>
+          </div>
+        </details>
       </section>
 
+      <p class="notice">Check dates, times and availability on the original listing. Saved opportunities stay on this device and may disappear when browser data is cleared.</p>
+      <p id="save-status" role="status" class="status-bar"></p>
       <details id="map-details" class="map-section">
         <summary>Show approximate locations on a map</summary>
         <p>Markers show town or city centres, not exact addresses. Opening the map loads services from Leaflet and OpenStreetMap.</p>
@@ -62,6 +95,7 @@
     </main>
   </div>
   <script src="map.js"></script>
+  <script src="listing-utils.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -338,14 +338,12 @@ def normalise_event(listing: Listing) -> Listing:
     """Apply event defaults during normalisation."""
     if not listing.type:
         listing.type = "event"
-    if not listing.event_start and listing.posted_date:
-        listing.event_start = listing.posted_date
     return listing
 
 
 def event_sort_key(listing: Listing) -> tuple:
     """Sort upcoming events chronologically by start date ascending."""
-    start = listing.event_start or listing.posted_date or "9999-12-31"
+    start = listing.event_start or "9999-12-31"
     return (start, listing.title.lower())
 
 

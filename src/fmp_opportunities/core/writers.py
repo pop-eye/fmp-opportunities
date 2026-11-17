@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+import logging
 import xml.etree.ElementTree as ET
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
 from typing import Optional
@@ -15,6 +16,7 @@ from icalendar import Calendar, Event
 from fmp_opportunities.core.models import Listing, utc_now_iso
 
 UK_TZ = ZoneInfo("Europe/London")
+logger = logging.getLogger(__name__)
 
 
 def parse_iso_datetime(value: Optional[str]) -> Optional[datetime]:
@@ -168,8 +170,9 @@ def write_ics(
     dtstamp = stamp_time or datetime.now(timezone.utc)
 
     for listing in listings:
-        start_val = parse_iso_date_or_datetime(listing.event_start or listing.posted_date)
+        start_val = parse_iso_date_or_datetime(listing.event_start)
         if start_val is None:
+            logger.warning("Skipping calendar event %r: no valid event start date.", listing.title)
             continue
 
         event = Event()
@@ -180,8 +183,6 @@ def write_ics(
         end_val = parse_iso_date_or_datetime(listing.event_end)
         if end_val is not None:
             event.add("dtend", end_val)
-        elif isinstance(start_val, datetime):
-            event.add("dtend", start_val + timedelta(hours=1))
 
         event.add("summary", listing.title)
         if listing.location:

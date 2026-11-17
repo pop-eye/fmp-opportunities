@@ -213,6 +213,23 @@ def test_state_reconcile_expiry_and_suspicious_drop() -> None:
     assert is_suspicious_drop(previous_count=10, fresh_count=6) is False
 
 
+def test_refreshed_expired_listing_does_not_restore_old_state() -> None:
+    previous = Listing(
+        title="Video placement",
+        organisation="Studio",
+        location="Manchester",
+        source_url="https://example.com/placement",
+        first_seen="2026-11-10T12:00:00Z",
+        last_seen="2026-11-16T12:00:00Z",
+    )
+    refreshed = Listing.from_dict(previous.to_dict())
+    refreshed.closing_date = "2026-11-16"
+    state = {"jobs": {"items": {previous.unique_id: previous.to_dict()}}}
+    result, stats = reconcile_state("jobs", [refreshed], state, now_iso="2026-11-17T12:00:00Z")
+    assert result == []
+    assert stats["removed_count"] == 1
+
+
 def test_run_jobs_end_to_end(tmp_path: Path) -> None:
     rss_xml = """<?xml version="1.0" encoding="UTF-8"?>
     <rss version="2.0">

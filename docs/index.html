@@ -8,71 +8,47 @@
 </head>
 <body>
   <div class="container">
-    <header class="page-header">
-      <h1>BA Future Media Production Opportunities</h1>
-      <p class="card-summary">
-        Weekly curated feeds for Manchester Metropolitan University students covering creative media, digital arts, and creative technology.
-      </p>
+    <header class="page-header hero">
+      <p class="eyebrow">Manchester Metropolitan University</p>
+      <h1>Find your next creative opportunity</h1>
+      <p>Jobs, placements and events for Future Media Production students. Explore creative media, digital arts, social media and technology.</p>
       <nav class="nav-links" aria-label="Opportunity feeds">
-        <a href="index.html" aria-current="page">Overview</a>
+        <a href="index.html" aria-current="page">Home</a>
         <a href="jobs.html">Jobs</a>
         <a href="placements.html">Placements</a>
         <a href="events.html">Events</a>
       </nav>
     </header>
-
     <main>
-      <ul class="listings">
-        <li class="card">
-          <div class="card-header">
-            <h2 class="card-title"><a href="jobs.html">Graduate and Entry Level Jobs</a></h2>
-            <span class="badge badge-new" id="count-jobs">Loading</span>
-          </div>
-          <p class="card-summary">Entry level roles across video, audio, motion graphics, UX, games, and creative technology.</p>
-          <p class="card-meta"><a href="jobs.xml">RSS feed (jobs.xml)</a></p>
+      <h2>Where would you like to start?</h2>
+      <ul class="home-grid">
+        <li class="card home-card">
+          <h3 class="card-title">Graduate and entry level jobs</h3>
+          <p>Start your career in production, design, social media and creative technology.</p>
+          <p id="count-jobs" class="home-count" role="status">Loading opportunities</p>
+          <a class="button button-primary" href="jobs.html">Find a graduate job</a>
+          <div class="quick-links"><a href="jobs.html?view=new">New jobs</a><a href="jobs.html?view=closing">Closing soon</a><a href="jobs.html?view=saved">Saved jobs</a></div>
         </li>
-        <li class="card">
-          <div class="card-header">
-            <h2 class="card-title"><a href="placements.html">Placements and Internships</a></h2>
-            <span class="badge badge-new" id="count-placements">Loading</span>
-          </div>
-          <p class="card-summary">Sandwich years, graduate schemes, and short term creative placements.</p>
-          <p class="card-meta"><a href="placements.xml">RSS feed (placements.xml)</a></p>
+        <li class="card home-card">
+          <h3 class="card-title">Placements and internships</h3>
+          <p>Build your skills with opportunities during or after your studies.</p>
+          <p id="count-placements" class="home-count" role="status">Loading opportunities</p>
+          <a class="button button-primary" href="placements.html">Find a placement</a>
+          <div class="quick-links"><a href="placements.html?view=new">New placements</a><a href="placements.html?view=closing">Closing soon</a><a href="placements.html?view=saved">Saved placements</a></div>
         </li>
-        <li class="card">
-          <div class="card-header">
-            <h2 class="card-title"><a href="events.html">Creative and Digital Events</a></h2>
-            <span class="badge badge-new" id="count-events">Loading</span>
-          </div>
-          <p class="card-summary">Talks, festivals, screenings, workshops, networking nights, and open calls.</p>
-          <p class="card-meta">
-            <a href="events.xml">RSS feed (events.xml)</a>
-            <a href="events.ics">iCalendar feed (events.ics)</a>
-          </p>
+        <li class="card home-card">
+          <h3 class="card-title">Creative and digital events</h3>
+          <p>Meet people and discover talks, workshops, screenings and festivals.</p>
+          <p id="count-events" class="home-count" role="status">Loading opportunities</p>
+          <a class="button button-primary" href="events.html">Explore events</a>
+          <div class="quick-links"><a href="events.html?view=new">New events</a><a href="events.html?view=saved">Saved events</a></div>
         </li>
       </ul>
-      <p class="status-bar" style="margin-top: 1rem;">
-        Combined RSS feed: <a href="all.xml">all.xml</a>
-      </p>
+      <p class="notice">Information comes from external sources and can change. Check the original listing before applying or booking.</p>
+      <p class="status-bar">Feeds: <a href="jobs.xml">Jobs RSS</a>, <a href="placements.xml">Placements RSS</a>, <a href="events.xml">Events RSS</a>, <a href="all.xml">Combined RSS</a> and <a href="events.ics">Events calendar</a>.</p>
     </main>
   </div>
-  <script>
-    (function () {
-      ["jobs", "placements", "events"].forEach(function (tool) {
-        var el = document.getElementById("count-" + tool);
-        if (!el) return;
-        fetch(tool + ".json")
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (data) {
-            el.textContent = data && typeof data.count === "number"
-              ? data.count + " listings"
-              : "Not yet generated";
-          })
-          .catch(function () {
-            el.textContent = "Not yet generated";
-          });
-      });
-    })();
-  </script>
+  <script src="listing-utils.js"></script>
+  <script src="home.js"></script>
 </body>
 </html>

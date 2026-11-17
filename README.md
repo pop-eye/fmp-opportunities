@@ -6,6 +6,8 @@ The project generates RSS 2.0 XML feeds, an iCalendar `.ics` file, JSON data fil
 
 Each feed page has an optional map. Markers represent approximate centres of recognised towns and cities, and reflect the current filters. Remote listings and locations that are unknown, ambiguous, or outside the built in list remain in the results below the map. Opening the map loads Leaflet from unpkg and map tiles from OpenStreetMap. These services receive the visitor's IP address and normal browser request information. No geocoding service or location tracking is used. Tiles are subject to the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/).
 
+Students can search, filter and sort each feed, or save listings in their browser. Saved listing identifiers stay on that device and are not sent to a server. They can disappear if browser data is cleared or the listing is no longer available. If browser storage is blocked, the page reports that saving is unavailable. The website hides listings with known past dates between updates, but dates and availability can be missing or change. Students should check the original source.
+
 ## Project structure
 
 * [run.py](run.py): command line entry point.

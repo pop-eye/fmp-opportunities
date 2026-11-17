@@ -17,6 +17,7 @@ from fmp_opportunities.tools.events import (
     _extract_event_dates,
     event_sort_key,
     parse_homemcr,
+    normalise_event,
     parse_rts_events,
     parse_ukie_events,
     run_events,
@@ -177,6 +178,12 @@ def test_parse_homemcr_html(tmp_path: Path) -> None:
     assert items[0].event_start == "2026-12-10"
     assert items[0].cost == "Free"
     assert event_sort_key(items[0])[0] == "2026-12-10"
+
+
+def test_event_posted_date_is_not_treated_as_event_date() -> None:
+    event = Listing(title="Workshop", organisation="Studio", location="Manchester", posted_date="2026-11-10")
+    assert normalise_event(event).event_start is None
+    assert event_sort_key(event)[0] == "9999-12-31"
 
 
 def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:

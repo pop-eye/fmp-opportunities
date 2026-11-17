@@ -211,6 +211,23 @@ def test_write_ics_valid_vevent(tmp_path: Path) -> None:
     assert "Cost: Free" in str(vevent.get("description"))
 
 
+def test_calendar_does_not_invent_event_dates_or_end_times(tmp_path: Path) -> None:
+    unknown = Listing(
+        title="Date unknown", organisation="Organiser", location="Manchester",
+        posted_date="2026-11-17", source_url="https://example.com/unknown",
+    )
+    timed = Listing(
+        title="Timed event", organisation="Organiser", location="Manchester",
+        event_start="2026-11-28T19:00:00+00:00", source_url="https://example.com/timed",
+    )
+    path = tmp_path / "events.ics"
+    write_ics([unknown, timed], path)
+    events = [component for component in Calendar.from_ical(path.read_bytes()).walk() if component.name == "VEVENT"]
+    assert len(events) == 1
+    assert str(events[0].get("summary")) == "Timed event"
+    assert events[0].get("dtend") is None
+
+
 def test_write_json(tmp_path: Path) -> None:
     job = Listing(
         title="UX Designer",

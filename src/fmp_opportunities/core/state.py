@@ -78,6 +78,7 @@ def reconcile_state(
     }
 
     merged_by_id: dict[str, Listing] = {}
+    fresh_ids = {item.unique_id for item in fresh_listings}
     added_count = 0
 
     for item in fresh_listings:
@@ -98,7 +99,7 @@ def reconcile_state(
 
     # Retain unexpired previous items that were not seen in this run up to stale_after_days
     for uid, prev in previous_by_id.items():
-        if uid in merged_by_id:
+        if uid in fresh_ids:
             continue
         if is_expired(prev, today=today):
             continue
