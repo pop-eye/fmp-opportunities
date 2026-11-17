@@ -199,7 +199,13 @@ def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:
                 ]
             }
 
-    monkeypatch.setattr("requests.post", lambda *_args, **_kwargs: FakeResp())
+    captured_prompts: list[str] = []
+
+    def fake_post(_url, **kwargs):
+        captured_prompts.append(kwargs["json"]["messages"][0]["content"])
+        return FakeResp()
+
+    monkeypatch.setattr("requests.post", fake_post)
     hook = create_llama_cpp_hook("http://localhost:8080/v1/chat/completions")
     result = hook(
         Listing(title="Creative Tech Placement", organisation="BBC", location="Salford"),
@@ -207,6 +213,8 @@ def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:
     )
     assert result["relevant"] is True
     assert result["type"] == "sandwich year"
+    assert "Today's date is " in captured_prompts[0]
+    assert "Closing date:" in captured_prompts[0]
 
 
 def test_discipline_tagging_and_new_event_parsers(tmp_path: Path) -> None:

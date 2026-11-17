@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -43,6 +44,7 @@ def create_llama_cpp_hook(
     """Return an LLMClassifierHook backed by a local llama.cpp or Ollama server."""
 
     def _classify(listing: Listing, tool: str) -> dict[str, Any]:
+        today_iso = datetime.now(timezone.utc).date().isoformat()
         placement_instruction = ""
         if tool == "placements":
             placement_instruction = (
@@ -54,11 +56,17 @@ def create_llama_cpp_hook(
         prompt = (
             "You are filtering opportunities for BA Future Media Production students at "
             "Manchester Metropolitan University (video, audio, motion graphics, creative "
-            "technology, UX, games, broadcast, community media).\n"
+            "technology, UX, games, broadcast, community media, social media and marketing).\n"
+            f"Today's date is {today_iso}.\n"
+            "If the title, summary, or dates show that the closing date or event has already "
+            "passed before today, or that applications are closed, set relevant to false.\n"
             f"Tool: {tool}\n"
             f"Title: {listing.title}\n"
             f"Organisation: {listing.organisation}\n"
             f"Location: {listing.location}\n"
+            f"Closing date: {listing.closing_date or 'not stated'}\n"
+            f"Event start: {listing.event_start or 'not stated'}\n"
+            f"Event end: {listing.event_end or 'not stated'}\n"
             f"Summary: {listing.summary[:300]}\n\n"
             f"{placement_instruction}"
             'Reply ONLY with JSON: {"relevant": true/false, "reason": "short reason"'
