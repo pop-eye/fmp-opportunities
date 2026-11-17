@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMP Placements and Internships</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" data-tool="placements" data-json="placements.json">
+    <header class="page-header">
+      <h1>Placements and Internships</h1>
+      <div class="meta-row">
+        <span id="last-updated">Last updated: loading</span>
+        <a href="placements.xml">RSS Feed (placements.xml)</a>
+      </div>
+      <nav class="nav-links" aria-label="Opportunity feeds">
+        <a href="index.html">Overview</a>
+        <a href="jobs.html">Jobs</a>
+        <a href="placements.html" aria-current="page">Placements</a>
+        <a href="events.html">Events</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="controls" aria-label="Filter placements">
+        <div class="control-group">
+          <label for="filter-search">Search keywords</label>
+          <input id="filter-search" type="search" placeholder="Title, employer, skills">
+        </div>
+        <div class="control-group">
+          <label for="filter-type">Placement type</label>
+          <select id="filter-type">
+            <option value="">All types</option>
+            <option value="sandwich year">Sandwich year</option>
+            <option value="graduate scheme or internship (after study)">Graduate scheme or internship (after study)</option>
+            <option value="short term placement (weeks to months)">Short term placement (weeks to months)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="filter-location">Location</label>
+          <select id="filter-location">
+            <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="filter-paid">Pay status</label>
+          <select id="filter-paid">
+            <option value="">All</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="not stated">Not stated</option>
+          </select>
+        </div>
+      </section>
+
+      <p id="status-bar" class="status-bar" aria-live="polite">Loading placements...</p>
+      <ul id="listings" class="listings"></ul>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMP Opportunities Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <h1>BA Future Media Production Opportunities</h1>
+      <p class="card-summary">
+        Weekly curated feeds for Manchester Metropolitan University students covering creative media, digital arts, and creative technology.
+      </p>
+      <nav class="nav-links" aria-label="Opportunity feeds">
+        <a href="index.html" aria-current="page">Overview</a>
+        <a href="jobs.html">Jobs</a>
+        <a href="placements.html">Placements</a>
+        <a href="events.html">Events</a>
+      </nav>
+    </header>
+
+    <main>
+      <ul class="listings">
+        <li class="card">
+          <div class="card-header">
+            <h2 class="card-title"><a href="jobs.html">Graduate and Entry Level Jobs</a></h2>
+            <span class="badge badge-new" id="count-jobs">Loading</span>
+          </div>
+          <p class="card-summary">Entry level roles across video, audio, motion graphics, UX, games, and creative technology.</p>
+          <p class="card-meta"><a href="jobs.xml">RSS feed (jobs.xml)</a></p>
+        </li>
+        <li class="card">
+          <div class="card-header">
+            <h2 class="card-title"><a href="placements.html">Placements and Internships</a></h2>
+            <span class="badge badge-new" id="count-placements">Loading</span>
+          </div>
+          <p class="card-summary">Sandwich years, graduate schemes, and short term creative placements.</p>
+          <p class="card-meta"><a href="placements.xml">RSS feed (placements.xml)</a></p>
+        </li>
+        <li class="card">
+          <div class="card-header">
+            <h2 class="card-title"><a href="events.html">Creative and Digital Events</a></h2>
+            <span class="badge badge-new" id="count-events">Loading</span>
+          </div>
+          <p class="card-summary">Talks, festivals, screenings, workshops, networking nights, and open calls.</p>
+          <p class="card-meta">
+            <a href="events.xml">RSS feed (events.xml)</a>
+            <a href="events.ics">iCalendar feed (events.ics)</a>
+          </p>
+        </li>
+      </ul>
+      <p class="status-bar" style="margin-top: 1rem;">
+        Combined RSS feed: <a href="all.xml">all.xml</a>
+      </p>
+    </main>
+  </div>
+  <script>
+    (function () {
+      ["jobs", "placements", "events"].forEach(function (tool) {
+        var el = document.getElementById("count-" + tool);
+        if (!el) return;
+        fetch(tool + ".json")
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            el.textContent = data && typeof data.count === "number"
+              ? data.count + " listings"
+              : "Not yet generated";
+          })
+          .catch(function () {
+            el.textContent = "Not yet generated";
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMP Graduate and Entry Level Jobs</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" data-tool="jobs" data-json="jobs.json">
+    <header class="page-header">
+      <h1>Graduate and Entry Level Jobs</h1>
+      <div class="meta-row">
+        <span id="last-updated">Last updated: loading</span>
+        <a href="jobs.xml">RSS Feed (jobs.xml)</a>
+      </div>
+      <nav class="nav-links" aria-label="Opportunity feeds">
+        <a href="index.html">Overview</a>
+        <a href="jobs.html" aria-current="page">Jobs</a>
+        <a href="placements.html">Placements</a>
+        <a href="events.html">Events</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="controls" aria-label="Filter jobs">
+        <div class="control-group">
+          <label for="filter-search">Search keywords</label>
+          <input id="filter-search" type="search" placeholder="Title, employer, skills">
+        </div>
+        <div class="control-group">
+          <label for="filter-location">Location</label>
+          <select id="filter-location">
+            <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="checkbox-group">
+          <input id="filter-remote" type="checkbox">
+          <label for="filter-remote">Remote roles only</label>
+        </div>
+      </section>
+
+      <p id="status-bar" class="status-bar" aria-live="polite">Loading jobs...</p>
+      <ul id="listings" class="listings"></ul>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

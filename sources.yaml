@@ -1,0 +1,109 @@
+# Configuration of opportunity sources for each tool.
+# Each source requires: name, type (api, rss, ical, html), url, and enabled.
+# Optional fields: selectors, parser, rate_limit_seconds, options, notes.
+
+jobs:
+  - name: Reed API
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.jobs:parse_reed_api
+    rate_limit_seconds: 1.0
+    options:
+      keywords: graduate media video motion creative digital
+      locationName: Manchester
+      distanceFromLocation: 30
+      resultsToTake: 50
+    notes: Official API. Requires REED_API_KEY environment variable.
+
+  - name: Adzuna API
+    type: api
+    url: https://api.adzuna.com/v1/api/jobs/gb/search/1
+    enabled: true
+    parser: fmp_opportunities.tools.jobs:parse_adzuna_api
+    rate_limit_seconds: 1.0
+    options:
+      what: graduate creative media video digital
+      where: Manchester
+      results_per_page: 50
+    notes: Official API. Requires ADZUNA_APP_ID and ADZUNA_APP_KEY environment variables.
+
+  - name: Creative Access
+    type: html
+    url: https://opportunities.creativeaccess.org.uk/jobs/united-kingdom
+    enabled: true
+    parser: fmp_opportunities.tools.jobs:parse_creative_access
+    rate_limit_seconds: 10.0
+    notes: robots.txt allows / with Crawl-delay 10. Focuses on under-represented groups in creative industries.
+
+  - name: ArtsJobs
+    type: html
+    url: https://www.artsjobs.org.uk/jobs
+    enabled: true
+    parser: fmp_opportunities.tools.jobs:parse_artsjobs
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows /jobs. UK arts and creative sector listings.
+
+  - name: Prolific North
+    type: html
+    url: https://www.prolificnorth.co.uk/jobs/
+    enabled: false
+    rate_limit_seconds: 3.0
+    notes: Disabled by default because Cloudflare returns HTTP 403 to automated requests.
+
+placements:
+  - name: Creative Access Internships
+    type: html
+    url: https://opportunities.creativeaccess.org.uk/jobs/internship-traineeship
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_creative_access_placements
+    rate_limit_seconds: 10.0
+    notes: robots.txt allows / with Crawl-delay 10.
+
+  - name: Prospects Work Experience
+    type: html
+    url: https://www.prospects.ac.uk/jobs-and-work-experience/work-experience-and-internships
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_prospects
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows public pages; /redirect/ and /apply?id=* are disallowed.
+
+  - name: Year in Industry
+    type: html
+    url: https://www.etrust.org.uk/the-year-in-industry
+    enabled: true
+    parser: fmp_opportunities.tools.placements:parse_yini
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows /.
+
+  - name: Creativepool
+    type: html
+    url: https://creativepool.com/jobs/
+    enabled: false
+    rate_limit_seconds: 3.0
+    notes: robots.txt allows /jobs/ and /search/jobs/ (no query strings). Disabled until HTML selectors are tuned for live layout.
+
+events:
+  - name: HOME Manchester
+    type: html
+    url: https://homemcr.org/whats-on/
+    enabled: false
+    parser: fmp_opportunities.tools.events:parse_homemcr
+    rate_limit_seconds: 5.0
+    notes: Disabled by default because /whats-on/ returns HTTP 403 to automated requests.
+
+  - name: Factory International
+    type: html
+    url: https://factoryinternational.org/whats-on/
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_factory_international
+    rate_limit_seconds: 2.0
+    notes: Public Whats On page at Aviva Studios, Manchester.
+
+  - name: Manchester Digital Events
+    type: html
+    url: https://www.manchesterdigital.com/events
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_manchester_digital
+    rate_limit_seconds: 2.0
+    notes: robots.txt allows /events.

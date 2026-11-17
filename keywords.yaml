@@ -1,0 +1,57 @@
+# Relevance filtering terms and weights.
+# Scores are summed across matching include terms in title, summary, tags, and organisation.
+# Any item matching an exclude term is dropped.
+
+global:
+  min_score: 1.0
+  include:
+    video production: 2.0
+    audio production: 2.0
+    motion graphics: 2.0
+    creative technology: 2.0
+    post production: 2.0
+    broadcast: 1.5
+    content production: 1.5
+    digital design: 1.5
+    interactive media: 2.0
+    games: 1.5
+    ux: 1.5
+    creative producing: 2.0
+    community media: 1.5
+    junior: 1.0
+    graduate: 1.0
+    entry level: 1.0
+    manchester: 1.5
+    north west: 1.0
+    salford: 1.5
+    media city: 1.5
+  exclude:
+    - senior
+    - director
+    - head of
+    - principal
+    - lead engineer
+    - 5+ years
+    - 10+ years
+
+jobs:
+  min_score: 1.5
+
+placements:
+  min_score: 1.0
+  include:
+    placement: 1.5
+    internship: 1.5
+    sandwich year: 2.0
+    year in industry: 2.0
+
+events:
+  min_score: 1.0
+  include:
+    festival: 1.5
+    screening: 1.5
+    workshop: 1.5
+    networking: 1.5
+    open call: 1.5
+    competition: 1.5
+    talk: 1.0
