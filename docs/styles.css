@@ -375,12 +375,94 @@ a:hover {
 }
 
 .controls,
-.map-section {
+.map-section,
+.calendar-section {
   margin-bottom: 1rem;
   padding: 1.1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.calendar-section h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.calendar-section > p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.calendar-navigation h3 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.calendar-table {
+  width: 100%;
+  margin: 0.75rem 0;
+  table-layout: fixed;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.calendar-table th {
+  padding: 0.4rem 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.calendar-table td {
+  height: 54px;
+  padding: 2px;
+  border: 1px solid var(--border);
+}
+
+.calendar-day {
+  width: 100%;
+  min-height: 48px;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+}
+
+.calendar-day.has-events {
+  border-color: var(--accent);
+  background: var(--lime);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.calendar-day[aria-pressed="true"] {
+  color: var(--accent-contrast);
+  background: var(--accent);
+}
+
+.calendar-count {
+  display: block;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+#calendar-selection ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.4rem;
+}
+
+#calendar-selection li {
+  margin: 0.4rem 0;
 }
 
 .more-filters {

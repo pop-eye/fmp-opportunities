@@ -30,6 +30,7 @@
   const updateMap = mapDetails
     ? OpportunityMap.setup(mapDetails, $("map"), $("map-status"))
     : null;
+  const updateCalendar = tool === "events" ? EventCalendar.setup() : null;
 
   try {
     const stored = JSON.parse(localStorage.getItem(storageKey) || "[]");
@@ -128,6 +129,7 @@
 
     $("status-bar").textContent = `Showing ${visibleItems.length} of ${current.length} current listings.`;
     if (updateMap) updateMap(visibleItems);
+    if (updateCalendar) updateCalendar(visibleItems);
     if (!visibleItems.length) {
       list.innerHTML = '<li class="empty-state">No matching opportunities. Try clearing the filters or check again later.</li>';
       return;

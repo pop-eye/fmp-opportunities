@@ -86,6 +86,25 @@
 
       <p class="notice">Check dates, times and availability on the original listing. Saved opportunities stay on this device and may disappear when browser data is cleared. <a href="events.html?view=saved">View saved events</a>.</p>
       <p id="save-status" role="status" class="status-bar"></p>
+      <section id="event-calendar" class="calendar-section" aria-labelledby="calendar-heading">
+        <h2 id="calendar-heading">Events calendar</h2>
+        <p>Choose a date to see its events. The calendar follows your filters; events without a known date remain in the list below.</p>
+        <div class="calendar-navigation">
+          <button id="calendar-previous" type="button" class="button button-secondary" aria-label="Previous month">Previous</button>
+          <h3 id="calendar-month" aria-live="polite"></h3>
+          <button id="calendar-next" type="button" class="button button-secondary" aria-label="Next month">Next</button>
+        </div>
+        <table class="calendar-table" aria-labelledby="calendar-heading calendar-month">
+          <thead><tr>
+            <th scope="col" abbr="Monday">Mon</th><th scope="col" abbr="Tuesday">Tue</th>
+            <th scope="col" abbr="Wednesday">Wed</th><th scope="col" abbr="Thursday">Thu</th>
+            <th scope="col" abbr="Friday">Fri</th><th scope="col" abbr="Saturday">Sat</th>
+            <th scope="col" abbr="Sunday">Sun</th>
+          </tr></thead>
+          <tbody id="calendar-days"></tbody>
+        </table>
+        <div id="calendar-selection" aria-live="polite">Choose a highlighted date to see events.</div>
+      </section>
       <details id="map-details" class="map-section">
         <summary>Show approximate locations on a map</summary>
         <p>Markers show approximate town, city or neighbourhood centres, not exact addresses. Use the mouse wheel or pinch to zoom. Opening the map loads services from Leaflet and OpenStreetMap.</p>
@@ -98,6 +117,7 @@
   </div>
   <script src="map.js"></script>
   <script src="listing-utils.js"></script>
+  <script src="calendar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
