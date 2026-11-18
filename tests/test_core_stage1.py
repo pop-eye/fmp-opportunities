@@ -118,6 +118,25 @@ placements:
     assert "unpaid volunteer" in kw.exclude
 
 
+def test_job_role_keywords_are_validated_and_tool_specific(tmp_path: Path) -> None:
+    kw_file = tmp_path / "keywords.yaml"
+    kw_file.write_text(
+        "jobs:\n  required_any: [Video, UX]\n  required_title_any: [Researcher]\n",
+        encoding="utf-8",
+    )
+    jobs = load_keywords(kw_file, tool="jobs")
+    assert jobs.required_any == ["video", "ux"]
+    assert jobs.required_title_any == ["researcher"]
+    assert load_keywords(kw_file, tool="events").required_any == []
+
+    kw_file.write_text("jobs:\n  required_any: video\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match="required_any"):
+        load_keywords(kw_file, tool="jobs")
+    kw_file.write_text("jobs:\n  required_title_any: [null]\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match="required_title_any"):
+        load_keywords(kw_file, tool="jobs")
+
+
 def test_write_rss_and_combined_rss(tmp_path: Path) -> None:
     job = Listing(
         title="Junior Video Editor",

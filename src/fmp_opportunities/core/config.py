@@ -9,7 +9,7 @@ from typing import Any, Optional
 import yaml
 
 VALID_SOURCE_TYPES = {"api", "rss", "ical", "html"}
-VALID_TOOLS = {"jobs", "placements", "events"}
+VALID_TOOLS = {"jobs", "placements", "apprenticeships", "events"}
 
 
 class ConfigError(ValueError):
@@ -38,6 +38,8 @@ class KeywordsConfig:
     include: dict[str, float] = field(default_factory=dict)
     exclude: list[str] = field(default_factory=list)
     min_score: float = 1.0
+    required_any: list[str] = field(default_factory=list)
+    required_title_any: list[str] = field(default_factory=list)
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -117,6 +119,8 @@ def load_keywords(path: str | Path, tool: Optional[str] = None) -> KeywordsConfi
 
     include: dict[str, float] = {}
     exclude: list[str] = []
+    required_any: list[str] = []
+    required_title_any: list[str] = []
     min_score = float(data.get("min_score", 1.0))
 
     def _merge_section(section: dict[str, Any]) -> None:
@@ -135,11 +139,24 @@ def load_keywords(path: str | Path, tool: Optional[str] = None) -> KeywordsConfi
             normalised = str(term).strip().lower()
             if normalised and normalised not in exclude:
                 exclude.append(normalised)
+        for key, target in (
+            ("required_any", required_any),
+            ("required_title_any", required_title_any),
+        ):
+            terms = section.get(key, [])
+            if not isinstance(terms, list):
+                raise ConfigError(f"'{key}' must be a list of terms in {path}")
+            for term in terms:
+                if not isinstance(term, str) or not term.strip():
+                    raise ConfigError(f"'{key}' must contain non-empty strings in {path}")
+                normalised = term.strip().lower()
+                if normalised and normalised not in target:
+                    target.append(normalised)
 
     global_section = data.get("global")
     if isinstance(global_section, dict):
         _merge_section(global_section)
-    elif "include" in data or "exclude" in data:
+    elif any(key in data for key in ("include", "exclude", "required_any", "required_title_any")):
         _merge_section(data)
 
     if tool:
@@ -151,4 +168,10 @@ def load_keywords(path: str | Path, tool: Optional[str] = None) -> KeywordsConfi
         if isinstance(tool_section, dict):
             _merge_section(tool_section)
 
-    return KeywordsConfig(include=include, exclude=exclude, min_score=min_score)
+    return KeywordsConfig(
+        include=include,
+        exclude=exclude,
+        min_score=min_score,
+        required_any=required_any,
+        required_title_any=required_title_any,
+    )

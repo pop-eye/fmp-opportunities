@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMP Creative and Digital Apprenticeships</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="container" data-tool="apprenticeships" data-json="apprenticeships.json">
+    <header class="page-header">
+      <p class="page-kicker"><a href="index.html">FMP / Opportunities</a> <span aria-hidden="true">✳</span> Learn on the job</p>
+      <h1>Creative and Digital Apprenticeships</h1>
+      <p>Explore opportunities to work, learn and develop creative skills.</p>
+      <div class="meta-row">
+        <span id="last-updated">Last updated: loading</span>
+        <a href="apprenticeships.xml">RSS Feed (apprenticeships.xml)</a>
+      </div>
+      <nav class="nav-links" aria-label="Opportunity feeds">
+        <a href="index.html">Overview</a>
+        <a href="jobs.html">Jobs</a>
+        <a href="placements.html">Placements</a>
+        <a href="apprenticeships.html" aria-current="page">Apprenticeships</a>
+        <a href="events.html">Events</a>
+      </nav>
+    </header>
+    <main id="main-content">
+      <section class="controls" aria-label="Filter apprenticeships">
+        <div class="control-group">
+          <label for="filter-search">Search keywords</label>
+          <input id="filter-search" type="search" placeholder="Title, employer, skills">
+        </div>
+        <details id="more-filters" class="more-filters">
+          <summary>Filters and sorting</summary>
+          <div class="filter-grid">
+            <div class="control-group">
+              <label for="filter-discipline">Discipline</label>
+              <select id="filter-discipline"><option value="">All disciplines</option></select>
+            </div>
+            <div class="control-group">
+              <label for="filter-location">Location</label>
+              <select id="filter-location"><option value="">All locations</option></select>
+            </div>
+            <div class="control-group">
+              <label for="filter-paid">Pay status</label>
+              <select id="filter-paid">
+                <option value="">All</option><option value="paid">Paid</option>
+                <option value="unpaid">Unpaid</option><option value="not stated">Not stated</option>
+              </select>
+            </div>
+            <div class="checkbox-group"><input id="filter-northwest" type="checkbox"><label for="filter-northwest">Manchester and North West</label></div>
+            <div class="checkbox-group"><input id="filter-remote" type="checkbox"><label for="filter-remote">Remote only</label></div>
+            <div class="checkbox-group"><input id="filter-new" type="checkbox"><label for="filter-new">New this week</label></div>
+            <div class="checkbox-group"><input id="filter-closing" type="checkbox"><label for="filter-closing">Closing soon</label></div>
+            <div class="checkbox-group"><input id="filter-saved" type="checkbox"><label for="filter-saved">Saved only</label></div>
+            <div class="control-group">
+              <label for="sort-order">Sort by</label>
+              <select id="sort-order"><option value="recommended">Recommended</option><option value="newest">Newest</option><option value="closing">Closing date</option></select>
+            </div>
+            <button id="reset-filters" type="button" class="button button-secondary">Clear filters</button>
+          </div>
+        </details>
+      </section>
+      <p class="notice">Check eligibility, training level, pay and dates on the original listing. Apprenticeships may not suit students already in full-time study. Saved opportunities stay on this device. <a href="apprenticeships.html?view=saved">View saved apprenticeships</a>.</p>
+      <p id="save-status" role="status" class="status-bar"></p>
+      <details id="map-details" class="map-section">
+        <summary>Show approximate locations on a map</summary>
+        <p>Markers show approximate town, city or neighbourhood centres, not exact addresses. Use the mouse wheel or pinch to zoom. Opening the map loads services from Leaflet and OpenStreetMap.</p>
+        <p id="map-status" role="status">Open the map to load it.</p>
+        <div id="map" class="map" aria-label="Approximate locations of apprenticeships"></div>
+      </details>
+      <p id="status-bar" class="status-bar" aria-live="polite">Loading apprenticeships...</p>
+      <ul id="listings" class="listings"></ul>
+      <section aria-labelledby="more-sources">
+        <h2 id="more-sources">More places to look</h2>
+        <p>Search the official service for more opportunities and check each listing for eligibility.</p>
+        <ul><li><a href="https://www.findapprenticeship.service.gov.uk/apprenticeshipsearch">Find an apprenticeship (GOV.UK)</a></li></ul>
+      </section>
+    </main>
+  </div>
+  <script src="map.js"></script>
+  <script src="listing-utils.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

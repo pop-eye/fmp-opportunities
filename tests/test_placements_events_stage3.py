@@ -6,11 +6,12 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import pytest
 from icalendar import Calendar
 
 from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
 from fmp_opportunities.core.fetcher import PoliteFetcher, parse_ical_feed
-from fmp_opportunities.core.filter import assign_discipline_tags
+from fmp_opportunities.core.filter import assign_discipline_tags, filter_listings
 from fmp_opportunities.core.llm import create_llama_cpp_hook
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.tools.events import (
@@ -18,6 +19,7 @@ from fmp_opportunities.tools.events import (
     event_sort_key,
     parse_homemcr,
     normalise_event,
+    parse_beyond_events,
     parse_rts_events,
     parse_ukie_events,
     run_events,
@@ -262,6 +264,156 @@ def test_parse_homemcr_html(tmp_path: Path) -> None:
     assert event_sort_key(items[0])[0] == "2026-12-10"
 
 
+def test_ukie_event_dates_are_isolated_from_neighbouring_cards(tmp_path: Path) -> None:
+    html = """
+    <div class="event-grid">
+      <a class="post-preview event-preview" href="https://www.eventbrite.co.uk/e/drinks">
+        <span class="date">December 9, 2026</span><h3>Festive Drinks</h3>
+        <p>Drinks in London.</p>
+      </a>
+      <a class="post-preview event-preview" href="https://www.eventbrite.co.uk/e/workshop">
+        <span class="date">February 3, 2027</span><h3>Pitching Skills Workshop with Jon Torrens</h3>
+        <p>Join a half-day workshop.</p>
+      </a>
+      <a class="post-preview event-preview" href="https://www.eventbrite.co.uk/e/conference">
+        <span class="date">February 11, 2027</span><h3>Ukie Conference</h3>
+      </a>
+    </div>
+    """
+    source = SourceConfig(name="UKIE", type="html", url="https://ukie.org.uk/events")
+    items = parse_ukie_events(source, html, StubFetcher({}, tmp_path))
+    assert [item.event_start for item in items] == ["2026-12-09", "2027-02-03", "2027-02-11"]
+    assert all(item.event_end is None for item in items)
+    assert "Festive Drinks" not in items[1].summary
+    assert items[1].location == "UK"
+
+
+def test_ukie_date_field_distinguishes_event_dates_from_description(tmp_path: Path) -> None:
+    html = """
+    <div class="event-grid">
+      <a href="https://www.eventbrite.co.uk/e/exhibition">
+        <span class="date">18 Nov - 20 Dec 2026</span><h3>Games Exhibition</h3>
+        <p>Registration opens 1 November 2026.</p>
+      </a>
+      <a href="https://www.eventbrite.co.uk/e/undated"><h3>Undated Workshop</h3></a>
+    </div>
+    """
+    source = SourceConfig(name="UKIE", type="html", url="https://ukie.org.uk/events")
+    items = parse_ukie_events(source, html, StubFetcher({}, tmp_path))
+    assert (items[0].event_start, items[0].event_end) == ("2026-11-18", "2026-12-20")
+    assert (items[1].event_start, items[1].event_end) == (None, None)
+
+
+def test_ukie_ambiguous_dates_without_date_field_are_not_guessed(tmp_path: Path, caplog) -> None:
+    html = """
+    <article>
+      <a href="https://www.eventbrite.co.uk/e/workshop"><h3>Pitching Workshop</h3></a>
+      Registration opens 1 November 2026. Event on 3 February 2027.
+    </article>
+    """
+    source = SourceConfig(name="UKIE", type="html", url="https://ukie.org.uk/events")
+    items = parse_ukie_events(source, html, StubFetcher({}, tmp_path))
+    assert (items[0].event_start, items[0].event_end) == (None, None)
+    assert "Ambiguous UKIE event dates" in caplog.text
+
+
+def test_ukie_separate_dates_are_not_treated_as_continuous_range(tmp_path: Path, caplog) -> None:
+    html = """
+    <a href="https://www.eventbrite.co.uk/e/workshop">
+      <span class="date">February 3, 2027 and February 11, 2027</span>
+      <h3>Pitching Workshop</h3>
+    </a>
+    """
+    source = SourceConfig(name="UKIE", type="html", url="https://ukie.org.uk/events")
+    items = parse_ukie_events(source, html, StubFetcher({}, tmp_path))
+    assert (items[0].event_start, items[0].event_end) == (None, None)
+    assert "Ambiguous UKIE event dates" in caplog.text
+
+
+def test_ukie_refresh_replaces_old_incorrect_dates_in_state_and_outputs(tmp_path: Path) -> None:
+    url = "https://www.eventbrite.co.uk/e/workshop"
+    old = Listing(
+        title="Pitching Skills Workshop with Jon Torrens", organisation="UKIE (Games & Interactive)",
+        location="London", source_url=url, event_start="2026-12-09", event_end="2027-02-11",
+        first_seen="2026-11-17T10:00:00Z", last_seen="2026-11-18T10:00:00Z",
+    )
+    state_file = tmp_path / "state.json"
+    state_file.write_text(json.dumps({"events": {"items": {old.unique_id: old.to_dict()}}}), encoding="utf-8")
+    html = """
+    <div class="event-grid">
+      <a href="https://www.eventbrite.co.uk/e/workshop">
+        <span class="date">February 3, 2027</span><h3>Pitching Skills Workshop with Jon Torrens</h3>
+      </a>
+    </div>
+    """
+    source = SourceConfig(
+        name="UKIE", type="html", url="https://ukie.org.uk/events",
+        parser="fmp_opportunities.tools.events:parse_ukie_events",
+    )
+    result = run_events(
+        [source], KeywordsConfig(include={"workshop": 1.0}), tmp_path / "docs", state_file,
+        "https://example.com/events", fetcher=StubFetcher({"ukie.org.uk": html}, tmp_path),
+    )
+    assert len(result.listings) == 1
+    refreshed = result.listings[0]
+    assert (refreshed.event_start, refreshed.event_end) == ("2027-02-03", None)
+    assert refreshed.unique_id == old.unique_id
+    assert refreshed.first_seen == old.first_seen
+    output = json.loads((tmp_path / "docs" / "events.json").read_text(encoding="utf-8"))
+    assert (output["items"][0]["event_start"], output["items"][0]["event_end"]) == ("2027-02-03", None)
+    cal = Calendar.from_ical((tmp_path / "docs" / "events.ics").read_bytes())
+    event = next(component for component in cal.walk() if component.name == "VEVENT")
+    assert event.decoded("dtstart").isoformat() == "2027-02-03"
+    assert event.get("dtend") is None
+
+
+def test_parse_beyond_event_cards(tmp_path: Path) -> None:
+    html = """
+    <ul>
+      <li class="events-listing__item">
+        <h3 class="event__title"><a class="event__link" href="/events/beyond/123">BEYOND 2026</a></h3>
+        <span class="event-meta__date">Mon 23 Nov 2026 12:00 PM - Wed 25 Nov 2026 5:00 PM</span>
+        <span class="event-meta__location">Lowry, M50 3AZ</span>
+        <a href="/checkout/123">GET TICKETS</a>
+      </li>
+      <li class="events-listing__item">
+        <h3 class="event__title"><a class="event__link" href="/events/beyond/456">BEYOND Online</a></h3>
+        <span class="event-meta__date">3 Dec 2026</span>
+        <span class="event-meta__location">Online</span>
+      </li>
+      <li class="events-listing__item">
+        <h3 class="event__title"><a class="event__link" href="/events/beyond/789">Summer Festival</a></h3>
+        <span class="event-meta__date">Mon 5 Jul 2027 1:00 PM - Mon 5 Jul 2027 3:00 PM</span>
+      </li>
+      <li class="events-listing__item"><a href="/checkout/789">GET TICKETS</a></li>
+    </ul>
+    """
+    source = SourceConfig(name="BEYOND Conference", type="html",
+                          url="https://tickets.beyondconference.org/events/beyond/",
+                          parser="fmp_opportunities.tools.events:parse_beyond_events")
+    items = parse_beyond_events(source, html, StubFetcher({}, tmp_path))
+    assert len(items) == 3
+    assert items[0].title == "BEYOND 2026"
+    assert items[0].source_url == "https://tickets.beyondconference.org/events/beyond/123"
+    assert (items[0].event_start, items[0].event_end) == (
+        "2026-11-23T12:00:00+00:00", "2026-11-25T17:00:00+00:00"
+    )
+    assert items[0].location == "Lowry, M50 3AZ"
+    assert items[1].event_start == "2026-12-03"
+    assert items[1].remote is True
+    assert (items[2].event_start, items[2].event_end) == (
+        "2027-07-05T13:00:00+01:00", "2027-07-05T15:00:00+01:00"
+    )
+    result = run_events(
+        [source], KeywordsConfig(include={"conference": 1.0}), tmp_path / "docs",
+        tmp_path / "state.json", "https://example.com/events",
+        fetcher=StubFetcher({"beyondconference.org": html}, tmp_path),
+    )
+    assert len(result.listings) == 3
+    calendar = Calendar.from_ical((tmp_path / "docs" / "events.ics").read_bytes())
+    assert len([item for item in calendar.walk() if item.name == "VEVENT"]) == 3
+
+
 def test_event_posted_date_is_not_treated_as_event_date() -> None:
     event = Listing(title="Workshop", organisation="Studio", location="Manchester", posted_date="2026-11-10")
     assert normalise_event(event).event_start is None
@@ -304,6 +456,40 @@ def test_extract_event_dates_and_llama_cpp_hook(monkeypatch) -> None:
     assert result["type"] == "sandwich year"
     assert "Today's date is " in captured_prompts[0]
     assert "Closing date:" in captured_prompts[0]
+    assert "A missing closing date or event date does not mean" in captured_prompts[0]
+
+
+@pytest.mark.parametrize("reply", ['{"relevant": "false"}', '{}', '{"relevant": null}'])
+def test_invalid_llm_relevance_is_logged_and_uses_keyword_fallback(monkeypatch, caplog, reply: str) -> None:
+    class FakeResp:
+        def raise_for_status(self) -> None:
+            pass
+
+        def json(self) -> dict:
+            return {"choices": [{"message": {"content": reply}}]}
+
+    monkeypatch.setattr("requests.post", lambda *args, **kwargs: FakeResp())
+    listing = Listing(title="Video Editor", organisation="Studio", location="Manchester")
+    kept = filter_listings(
+        [listing], KeywordsConfig(include={"video": 1.0}), "jobs", create_llama_cpp_hook()
+    )
+    assert kept == [listing]
+    assert "LLM response must contain a boolean 'relevant' field" in caplog.text
+
+
+def test_llm_boolean_false_rejects_listing(monkeypatch) -> None:
+    class FakeResp:
+        def raise_for_status(self) -> None:
+            pass
+
+        def json(self) -> dict:
+            return {"choices": [{"message": {"content": '{"relevant": false}'}}]}
+
+    monkeypatch.setattr("requests.post", lambda *args, **kwargs: FakeResp())
+    listing = Listing(title="Video Editor", organisation="Studio", location="Manchester")
+    assert filter_listings(
+        [listing], KeywordsConfig(include={"video": 1.0}), "jobs", create_llama_cpp_hook()
+    ) == []
 
 
 def test_discipline_tagging_and_new_event_parsers(tmp_path: Path) -> None:

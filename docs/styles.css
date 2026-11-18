@@ -287,6 +287,7 @@ a:hover {
 .home-card:nth-child(1) { background: var(--lime); }
 .home-card:nth-child(2) { background: var(--lilac); }
 .home-card:nth-child(3) { background: var(--coral); }
+.home-card:nth-child(4) { background: #d9e8ff; }
 
 .card-label {
   margin-bottom: 1.5rem;

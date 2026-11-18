@@ -1,6 +1,6 @@
 # fmp-opportunities
 
-Weekly feeds of graduate jobs, placements, and creative industry events for BA Future Media Production students at Manchester Metropolitan University.
+Weekly feeds of graduate jobs, placements, apprenticeships, and creative industry events for BA Future Media Production students at Manchester Metropolitan University.
 
 The project generates RSS 2.0 XML feeds, an iCalendar `.ics` file, JSON data files, and accessible static HTML pages in [docs/](docs/) for publishing via GitHub Pages and embedding inside Moodle.
 
@@ -12,15 +12,21 @@ Students can search, filter and sort each feed, or save listings in their browse
 
 The events page also has a monthly calendar. It follows the active filters; select a highlighted date to open its event listings. Multi-day events appear on each date in their stated range. Events without a known start date remain in the list but cannot appear on the calendar.
 
+For UKIE events, dates are read from each individual event card rather than from neighbouring listings. Ambiguous multiple dates are left unstated and a warning is logged rather than assuming a continuous range.
+
+Event sources are listed under `events` in [sources.yaml](sources.yaml). FACT Liverpool, the Whitworth and Eventbrite are recorded there for manual browsing, but disabled for automated imports. FACT and the Whitworth need permission and parser checks; Eventbrite prohibits automated scraping in its terms. BEYOND Conference and Factory International are configured for automatic checks.
+
 The placements feed searches the Reed API across creative disciplines and includes relevant internships from the gamesJobs RSS feed. Reed requires `REED_API_KEY`; gamesJobs permits light, polite RSS access, and its feed is limited to recent entries. The placements page also links to Higherin, Channel 4, Sky and Prospects for manual browsing. Those links are not automatically imported, and the availability and eligibility of individual programmes must be checked on the original sites.
+
+The apprenticeships feed searches the official Find an apprenticeship Display Advert API for English vacancies in the Creative and design and Digital routes, the Reed API using creative search terms, and the gamesJobs RSS feed. Relevant role terms in [keywords.yaml](keywords.yaml) filter the results. The official API and Reed require separate keys; gamesJobs may have no apprenticeship listings. The DfE search is limited to 50 pages per run and logs a warning if more pages are available. Results may be incomplete, so the page also links to the official search for manual browsing. Check whether each opportunity is suitable alongside existing studies.
 
 ## Project structure
 
 * [run.py](run.py): command line entry point.
-* [sources.yaml](sources.yaml): editable list of sources for `jobs`, `placements`, and `events`.
+* [sources.yaml](sources.yaml): editable list of sources for `jobs`, `placements`, `apprenticeships`, and `events`.
 * [keywords.yaml](keywords.yaml): relevance include weights and exclude terms.
 * [src/fmp_opportunities/core/](src/fmp_opportunities/core/): shared data model, configuration loader, polite HTTP fetcher, keyword filter, deduplicator, state manager, writers, and operational helpers.
-* [src/fmp_opportunities/tools/](src/fmp_opportunities/tools/): thin modules for `jobs`, `placements`, and `events`.
+* [src/fmp_opportunities/tools/](src/fmp_opportunities/tools/): thin modules for `jobs`, `placements`, `apprenticeships`, and `events`.
 * [docs/](docs/): generated feeds and static HTML pages for GitHub Pages.
 * [state/](state/): local JSON state (`state.json`) and HTTP cache (`cache/`).
 * [logs/](logs/): rotating log file (`fmp_opportunities.log`) and weekly summary (`weekly_summary.txt`).
@@ -51,11 +57,12 @@ python -m venv .venv
 
 Set environment variables in Windows (User environment variables via *Edit the system environment variables*, or in PowerShell before running):
 
-* **Reed API** (optional, for Jobs): register at [Reed Developers](https://www.reed.co.uk/developers/jobseeker) and set `REED_API_KEY`.
+* **Reed API** (optional, for jobs, placements and apprenticeships): register at [Reed Developers](https://www.reed.co.uk/developers/jobseeker) and set `REED_API_KEY`.
+* **Find an apprenticeship API** (optional, for apprenticeships): [register for an individual Display Advert API key](https://developer.apprenticeships.education.gov.uk/third-party-accounts/register), then set `DFE_APPRENTICESHIPS_API_KEY`. The API key stays on your computer and is sent only to the API. Read the [official API guidance](https://developer.apprenticeships.education.gov.uk/) before using it.
 * **Adzuna API** (optional, for Jobs): register at [Adzuna Developer](https://developer.adzuna.com/) and set `ADZUNA_APP_ID` and `ADZUNA_APP_KEY`.
 * **Email failure alerts** (optional): set `SMTP_HOST`, `SMTP_PORT` (default `587`), `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_TO`, and `SMTP_USE_TLS` (`true` or `false`).
 
-If `REED_API_KEY` or `ADZUNA_APP_ID` is not set, those sources are skipped cleanly without failing the run.
+If the relevant API key is not set, that source is skipped with a warning. Without the DfE or Reed key, the apprenticeships feed relies on gamesJobs and may be empty.
 
 ## 3. Running manually
 
@@ -71,11 +78,13 @@ Generate all feeds locally without pushing to GitHub:
 .venv\Scripts\python.exe run.py --tool all --no-push --site-url "https://YOUR_USERNAME.github.io/YOUR_REPO/"
 ```
 
-Run a single tool (`jobs`, `placements`, or `events`):
+Run a single tool (`jobs`, `placements`, `apprenticeships`, or `events`):
 
 ```powershell
 .venv\Scripts\python.exe run.py --tool jobs --no-push
 ```
+
+For apprenticeships alone, use `--tool apprenticeships`. Until the first feed run, the new page reports that its feed has not been generated. When running one tool, the combined RSS also includes existing JSON outputs from the other tools.
 
 Run and automatically commit and push changes in `docs/` to GitHub:
 
@@ -136,6 +145,7 @@ Replace `https://YOUR_USERNAME.github.io/YOUR_REPO` below with your actual GitHu
 5. Paste one of the feed URLs:
    * Jobs: `https://YOUR_USERNAME.github.io/YOUR_REPO/jobs.xml`
    * Placements: `https://YOUR_USERNAME.github.io/YOUR_REPO/placements.xml`
+   * Apprenticeships: `https://YOUR_USERNAME.github.io/YOUR_REPO/apprenticeships.xml`
    * Events: `https://YOUR_USERNAME.github.io/YOUR_REPO/events.xml`
    * All combined: `https://YOUR_USERNAME.github.io/YOUR_REPO/all.xml`
 
@@ -165,7 +175,7 @@ You can also link directly to `jobs.html`, `placements.html`, or `events.html` i
 
 ## 7. Adding a source
 
-You do not need to edit core Python code to add an RSS, iCal, or CSS selector HTML source. Open [sources.yaml](sources.yaml) and add an entry under `jobs`, `placements`, or `events`:
+You do not need to edit core Python code to add an RSS, iCal, or CSS selector HTML source. Open [sources.yaml](sources.yaml) and add an entry under `jobs`, `placements`, `apprenticeships`, or `events`:
 
 ```yaml
   - name: Example Creative Board
@@ -199,10 +209,12 @@ Always check `robots.txt` and the site's terms before enabling a new source.
 
 Open [keywords.yaml](keywords.yaml):
 
-* Add positive terms and weights under `global.include` or under a specific tool (`jobs`, `placements`, `events`).
+* Add positive terms and weights under `global.include` or under a specific tool (`jobs`, `placements`, `apprenticeships`, `events`).
 * Add unwanted terms (such as senior roles) under `exclude`. Any listing matching an `exclude` term is dropped.
+* Jobs must also match a term under `jobs.required_any` in their title or summary, or a term under `jobs.required_title_any` in their title. Employer names, locations and generic words such as `digital` cannot satisfy this check by themselves. Add terms for relevant roles that are being missed. Placements and events do not use these job-specific rules.
 * Adjust `min_score` per tool if too many or too few listings are kept.
 * Run `run.py --tool all --dry-run --verbose` to see the exact `KEEP` and `DROP` score and matched terms for every listing.
+* A listing fetched and rejected on a later run is removed from saved state rather than restored, unless the suspicious drop safeguard keeps the previous outputs. Listings not fetched can still remain for up to 14 days. The optional local LLM is a second opinion, not a guarantee of relevance. If its reply is invalid or the service is unavailable, the warning is logged and the keyword result is used.
 
 ## 9. Troubleshooting
 

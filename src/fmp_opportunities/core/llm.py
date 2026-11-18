@@ -60,6 +60,9 @@ def create_llama_cpp_hook(
             f"Today's date is {today_iso}.\n"
             "If the title, summary, or dates show that the closing date or event has already "
             "passed before today, or that applications are closed, set relevant to false.\n"
+            "A missing closing date or event date does not mean an opportunity has expired. "
+            "Employer branding, location, and the word digital alone do not establish creative "
+            "media relevance; consider what the role actually involves.\n"
             f"Tool: {tool}\n"
             f"Title: {listing.title}\n"
             f"Organisation: {listing.organisation}\n"
@@ -88,8 +91,10 @@ def create_llama_cpp_hook(
         data = resp.json()
         content = data["choices"][0]["message"]["content"]
         parsed = _extract_json(content)
+        if not isinstance(parsed, dict) or not isinstance(parsed.get("relevant"), bool):
+            raise ValueError("LLM response must contain a boolean 'relevant' field")
         return {
-            "relevant": bool(parsed.get("relevant", True)),
+            "relevant": parsed["relevant"],
             "reason": str(parsed.get("reason", "")),
             "type": parsed.get("type"),
         }

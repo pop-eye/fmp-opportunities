@@ -109,6 +109,7 @@ def run_tool_pipeline(
         fresh_listings=deduped,
         state=state,
         now_iso=now_iso,
+        observed_listings=normalised,
     )
 
     if sort_key_fn:

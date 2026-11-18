@@ -66,8 +66,9 @@ def reconcile_state(
     now_iso: Optional[str] = None,
     stale_after_days: int = 14,
     new_window_days: int = 7,
+    observed_listings: Optional[list[Listing]] = None,
 ) -> tuple[list[Listing], dict[str, int]]:
-    """Merge fresh listings with persisted state, drop expired items, and mark new items."""
+    """Merge fresh listings with state without restoring observed, rejected items."""
     timestamp = now_iso or utc_now_iso()
     now_dt = parse_iso_datetime(timestamp) or datetime.now(timezone.utc)
     today = now_dt.date()
@@ -85,6 +86,13 @@ def reconcile_state(
         if url:
             previous_by_url.setdefault(url, []).append(previous)
     fresh_urls = {canonicalise_url(item.source_url) for item in fresh_listings if item.source_url}
+    observed_urls = {
+        canonicalise_url(item.source_url)
+        for item in (observed_listings or [])
+        if item.source_url
+    }
+    observed_ids = {item.unique_id for item in (observed_listings or [])}
+    seen_urls = fresh_urls | observed_urls
     fresh_ids: set[str] = set()
     added_count = 0
 
@@ -113,7 +121,11 @@ def reconcile_state(
 
     # Retain unexpired previous items that were not seen in this run up to stale_after_days
     for uid, prev in previous_by_id.items():
-        if uid in fresh_ids or (prev.source_url and canonicalise_url(prev.source_url) in fresh_urls):
+        if (
+            uid in fresh_ids
+            or uid in observed_ids
+            or (prev.source_url and canonicalise_url(prev.source_url) in seen_urls)
+        ):
             continue
         if is_expired(prev, today=today):
             continue

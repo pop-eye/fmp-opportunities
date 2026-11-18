@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 from pathlib import Path
@@ -24,6 +25,7 @@ from fmp_opportunities.core.ops import (
 )
 from fmp_opportunities.core.pipeline import PipelineResult
 from fmp_opportunities.core.writers import write_combined_rss
+from fmp_opportunities.tools.apprenticeships import run_apprenticeships
 from fmp_opportunities.tools.events import run_events
 from fmp_opportunities.tools.jobs import run_jobs
 from fmp_opportunities.tools.placements import run_placements
@@ -50,7 +52,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--tool",
-        choices=["all", "jobs", "placements", "events"],
+        choices=["all", "jobs", "placements", "apprenticeships", "events"],
         default="all",
         help="Which tool to run (default: all).",
     )
@@ -183,6 +185,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 len(res.failed_sources),
             )
 
+        if args.tool in ("all", "apprenticeships"):
+            kw_apprenticeships = load_keywords(args.keywords, tool="apprenticeships")
+            res = run_apprenticeships(
+                sources=sources_by_tool.get("apprenticeships", []),
+                keywords=kw_apprenticeships,
+                docs_dir=args.docs_dir,
+                state_path=args.state_file,
+                channel_link=f"{base_url}/apprenticeships.html",
+                llm_hook=llm_hook,
+                dry_run=args.dry_run,
+            )
+            results_by_tool["apprenticeships"] = res.listings
+            pipeline_results.append(res)
+            logger.info(
+                "Apprenticeships complete: %d listings (%d added, %d removed, %d failed sources)",
+                len(res.listings),
+                res.added_count,
+                res.removed_count,
+                len(res.failed_sources),
+            )
+
         if args.tool in ("all", "events"):
             kw_events = load_keywords(args.keywords, tool="events")
             res = run_events(
@@ -205,6 +228,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
 
         if not args.dry_run and results_by_tool:
+            for other_tool in ("jobs", "placements", "apprenticeships", "events"):
+                if other_tool in results_by_tool:
+                    continue
+                previous_path = args.docs_dir / f"{other_tool}.json"
+                if previous_path.exists():
+                    payload = json.loads(previous_path.read_text(encoding="utf-8"))
+                    if not isinstance(payload, dict) or not isinstance(payload.get("items"), list):
+                        raise ValueError(f"Invalid existing listings in {previous_path}")
+                    results_by_tool[other_tool] = [
+                        Listing.from_dict(item) for item in payload["items"]
+                    ]
             write_combined_rss(
                 listings_by_tool=results_by_tool,
                 output_path=args.docs_dir / "all.xml",

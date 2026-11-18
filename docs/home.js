@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  ["jobs", "placements", "events"].forEach((tool) => {
+  ["jobs", "placements", "apprenticeships", "events"].forEach((tool) => {
     const output = document.getElementById(`count-${tool}`);
     fetch(`${tool}.json`)
       .then((response) => {
@@ -9,6 +9,10 @@
       })
       .then((data) => {
         if (!Array.isArray(data.items)) throw new Error("Invalid listings data");
+        if (data.last_updated === null) {
+          output.textContent = "Feed not generated yet";
+          return;
+        }
         const current = data.items.filter((item) => !ListingUtils.isExpired(item, tool));
         const fresh = current.filter((item) => ListingUtils.isNew(item)).length;
         const closing = tool === "events" ? "" : `, ${current.filter((item) => ListingUtils.closingSoon(item)).length} closing soon`;

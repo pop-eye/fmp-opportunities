@@ -150,6 +150,23 @@ def score_listing(listing: Listing, keywords: KeywordsConfig) -> FilterDecision:
             reason=f"excluded by term(s): {', '.join(matched_exclude)}",
         )
 
+    matched_role: list[str] = []
+    if keywords.required_any or keywords.required_title_any:
+        role_text = f"{listing.title} {listing.summary}".lower()
+        matched_role = [
+            term for term in keywords.required_any if _contains_term(role_text, term)
+        ] + [
+            term for term in keywords.required_title_any if _contains_term(listing.title.lower(), term)
+        ]
+        if not matched_role:
+            return FilterDecision(
+                kept=False,
+                score=0.0,
+                matched_include=[],
+                matched_exclude=[],
+                reason="no relevant role evidence in title or summary",
+            )
+
     score = 0.0
     matched_include: list[str] = []
     for term, weight in keywords.include.items():
@@ -158,12 +175,13 @@ def score_listing(listing: Listing, keywords: KeywordsConfig) -> FilterDecision:
             matched_include.append(f"{term} (+{weight:g})")
 
     if score >= keywords.min_score:
+        role_reason = f"; role evidence: {', '.join(matched_role)}" if matched_role else ""
         return FilterDecision(
             kept=True,
             score=score,
             matched_include=matched_include,
             matched_exclude=[],
-            reason=f"score {score:g} >= {keywords.min_score:g} ({', '.join(matched_include)})",
+            reason=f"score {score:g} >= {keywords.min_score:g} ({', '.join(matched_include)}){role_reason}",
         )
 
     return FilterDecision(

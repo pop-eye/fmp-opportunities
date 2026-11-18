@@ -144,7 +144,7 @@ def write_combined_rss(
         channel_title="FMP Opportunities (All)",
         channel_link=channel_link,
         channel_description=(
-            "Combined jobs, placements, and events for Future Media Production students."
+            "Combined jobs, placements, apprenticeships, and events for Future Media Production students."
         ),
         build_time=build_time,
     )

@@ -152,6 +152,8 @@
         details.push(["Closing date", formatDate(item.closing_date)]);
         if (tool === "placements") {
           details.push(["Placement type", item.type || "Not stated"]);
+        }
+        if (tool === "placements" || tool === "apprenticeships") {
           details.push(["Pay", item.paid || "Not stated"]);
         }
       }
@@ -218,7 +220,9 @@
     .then((data) => {
       if (!Array.isArray(data.items)) throw new Error("Invalid listings data");
       allItems = data.items;
-      $("last-updated").textContent = `Last updated: ${formatDate(data.last_updated, true)}`;
+      $("last-updated").textContent = data.last_updated === null
+        ? "Feed not generated yet"
+        : `Last updated: ${formatDate(data.last_updated, true)}`;
       addOptions(controls.discipline, allItems.flatMap((item) => item.category_tags || []));
       addOptions(controls.location, allItems.map((item) => item.location));
       render();

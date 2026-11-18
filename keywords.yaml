@@ -80,6 +80,87 @@ global:
 
 jobs:
   min_score: 1.0
+  # A location, employer name, or generic word such as "digital" is not enough.
+  # At least one of these must appear in the title or summary, or a title term below.
+  required_any: &creative_role_terms
+    - video
+    - videographer
+    - film
+    - filming
+    - camera
+    - cinematography
+    - photography
+    - photographer
+    - audio
+    - sound
+    - music
+    - radio
+    - podcast
+    - broadcast
+    - television
+    - tv
+    - motion graphics
+    - motion design
+    - motion designer
+    - animation
+    - animator
+    - vfx
+    - 3d
+    - editing
+    - editor
+    - editorial
+    - post production
+    - post-production
+    - media
+    - content
+    - social media
+    - paid social
+    - marketing
+    - brand
+    - branding
+    - communications
+    - copywriter
+    - ux
+    - ui
+    - user experience
+    - user interface
+    - graphic design
+    - graphic designer
+    - digital design
+    - digital designer
+    - digital experience
+    - web design
+    - web designer
+    - interactive
+    - vr
+    - ar
+    - xr
+    - mixed reality
+    - game
+    - games
+    - gaming
+    - unreal
+    - unity
+    - creative technology
+    - creative production
+    - community media
+  required_title_any: &creative_title_terms
+    - creative
+    - artworker
+    - artist
+    - illustrator
+    - producer
+    - researcher
+
+apprenticeships:
+  # Required creative role evidence is the gate; titles need not say "apprentice"
+  # when the official apprenticeship API has already identified the vacancy.
+  min_score: 0.0
+  required_any: *creative_role_terms
+  required_title_any: *creative_title_terms
+  include:
+    apprentice: 1.0
+    apprenticeship: 1.0
 
 placements:
   min_score: 1.0

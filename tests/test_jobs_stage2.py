@@ -6,11 +6,13 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from fmp_opportunities.core.config import KeywordsConfig, SourceConfig
+import pytest
+
+from fmp_opportunities.core.config import KeywordsConfig, SourceConfig, load_keywords
 from fmp_opportunities.core.dedup import deduplicate_listings
 from fmp_opportunities.core.fetcher import PoliteFetcher
 from fmp_opportunities.core.filter import filter_listings
-from fmp_opportunities.core.models import Listing
+from fmp_opportunities.core.models import Listing, utc_now_iso
 from fmp_opportunities.core.state import is_suspicious_drop, reconcile_state
 from fmp_opportunities.tools.jobs import (
     job_sort_key,
@@ -197,6 +199,99 @@ def test_filter_dedup_and_sort() -> None:
     assert deduped[0].location == "Manchester"
 
 
+def test_job_relevance_requires_actual_role_evidence() -> None:
+    keywords = load_keywords("keywords.yaml", tool="jobs")
+    items = [
+        Listing(title="Qualified Joiner", organisation="Creative Support", location="Manchester",
+                summary="Property maintenance across the North West."),
+        Listing(title="Digital Counsellor", organisation="The Portfolio Group", location="Manchester",
+                summary="Qualified counsellor providing health and wellbeing support."),
+        Listing(title="Customer Service Support Rep", organisation="Dream Digital", location="Manchester",
+                summary="Customer support representative."),
+        Listing(title="Social Media Assistant", organisation="Studio", location="Manchester",
+                summary="Create campaigns for social media."),
+        Listing(title="Trainee Researcher", organisation="BBC Studios", location="Bristol",
+                summary="Listed on Creative Access."),
+        Listing(title="Video Editor", organisation="Studio", location="London",
+                summary="Edit video programmes."),
+        Listing(title="Editorial assistant", organisation="Publisher", location="London",
+                summary="Listed on Creative Access."),
+        Listing(title="UX Designer", organisation="Studio", location="Manchester",
+                summary="Design user experiences."),
+        Listing(title="Junior Animator", organisation="Games Studio", location="Manchester",
+                summary="Animation for games."),
+    ]
+    kept = filter_listings(items, keywords, "jobs")
+    assert [item.title for item in kept] == [
+        "Social Media Assistant", "Trainee Researcher", "Video Editor",
+        "Editorial assistant", "UX Designer", "Junior Animator",
+    ]
+
+
+@pytest.mark.parametrize("rejection", ["keywords", "llm"])
+def test_observed_rejected_job_is_not_restored_from_state(tmp_path: Path, rejection: str) -> None:
+    now = utc_now_iso()
+    good = Listing(title="Junior Video Editor", organisation="Studio", location="Manchester",
+                   source_url="https://example.com/good", first_seen=now, last_seen=now)
+    rejected = Listing(title="Qualified Joiner", organisation="Creative Support", location="Manchester",
+                       source_url="https://example.com/bad", first_seen=now, last_seen=now)
+    unseen = Listing(title="Junior Camera Assistant", organisation="Another Studio", location="Manchester",
+                     source_url="https://example.com/unseen", source_name="Failed Board",
+                     first_seen=now, last_seen=now)
+    state_file = tmp_path / "state.json"
+    state_file.write_text(json.dumps({"jobs": {"items": {
+        item.unique_id: item.to_dict() for item in (good, rejected, unseen)
+    }}}), encoding="utf-8")
+    feed = """<rss><channel>
+      <item><title>Junior Video Editor</title><link>https://example.com/good</link>
+        <description>Video production</description></item>
+      <item><title>Qualified Joiner</title><link>https://example.com/bad</link>
+        <description>Property maintenance</description></item>
+    </channel></rss>"""
+    source = SourceConfig(name="Test", type="rss", url="https://example.com/feed.xml",
+                          options={"default_location": "Manchester"})
+    failed_source = SourceConfig(name="Failed Board", type="rss", url="https://example.com/failed.xml")
+    keywords = KeywordsConfig(
+        include={"manchester": 1.5}, min_score=1.0,
+        required_any=["video"] if rejection == "keywords" else [],
+    )
+    hook = (lambda item, _: {"relevant": item.title != "Qualified Joiner"}) if rejection == "llm" else None
+    result = run_jobs([source, failed_source], keywords, tmp_path / "docs", state_file, "https://example.com/jobs",
+                      fetcher=StubFetcher({"feed.xml": feed}, tmp_path),
+                      llm_hook=hook)
+    assert {item.title for item in result.listings} == {"Junior Video Editor", "Junior Camera Assistant"}
+    assert result.removed_count == 1
+    assert result.failed_sources == ["Failed Board"]
+
+
+def test_suspicious_drop_keeps_previous_outputs_even_if_rejected(tmp_path: Path) -> None:
+    now = utc_now_iso()
+    previous = [
+        Listing(title=f"Old role {index}", organisation="Studio", location="Manchester",
+                source_url=f"https://example.com/{index}", first_seen=now, last_seen=now)
+        for index in range(4)
+    ]
+    state_file = tmp_path / "state.json"
+    original_state = json.dumps({"jobs": {"items": {item.unique_id: item.to_dict() for item in previous}}})
+    state_file.write_text(original_state, encoding="utf-8")
+    docs_dir = tmp_path / "docs"
+    docs_dir.mkdir()
+    output = docs_dir / "jobs.json"
+    output.write_text("previous output", encoding="utf-8")
+    feed = """<rss><channel>
+      <item><title>Old role 0</title><link>https://example.com/0</link><description>Property maintenance</description></item>
+      <item><title>Video Editor</title><link>https://example.com/new</link><description>Video</description></item>
+    </channel></rss>"""
+    source = SourceConfig(name="Test", type="rss", url="https://example.com/feed.xml",
+                          options={"default_location": "Manchester"})
+    keywords = KeywordsConfig(include={"manchester": 1.5}, required_any=["video"])
+    result = run_jobs([source], keywords, docs_dir, state_file, "https://example.com/jobs",
+                      fetcher=StubFetcher({"feed.xml": feed}, tmp_path))
+    assert result.kept_previous_due_to_drop is True
+    assert output.read_text(encoding="utf-8") == "previous output"
+    assert state_file.read_text(encoding="utf-8") == original_state
+
+
 def test_state_reconcile_expiry_and_suspicious_drop() -> None:
     fresh = [
         Listing(
@@ -225,6 +320,7 @@ def test_state_reconcile_expiry_and_suspicious_drop() -> None:
     assert stats["added_count"] == 2
 
     assert is_suspicious_drop(previous_count=10, fresh_count=3) is True
+    assert is_suspicious_drop(previous_count=10, fresh_count=5) is False
     assert is_suspicious_drop(previous_count=10, fresh_count=6) is False
 
 

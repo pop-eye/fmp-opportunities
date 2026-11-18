@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
+from zoneinfo import ZoneInfo
 
 from bs4 import BeautifulSoup
 
@@ -15,6 +18,8 @@ from fmp_opportunities.core.filter import LLMClassifierHook
 from fmp_opportunities.core.models import Listing
 from fmp_opportunities.core.pipeline import PipelineResult, run_tool_pipeline
 from fmp_opportunities.tools.jobs import _normalise_uk_date
+
+logger = logging.getLogger(__name__)
 
 
 def _detect_cost(text: str) -> Optional[str]:
@@ -176,6 +181,62 @@ def parse_factory_international(
     return listings
 
 
+def _beyond_datetime(date: Optional[str], text: str, last: bool = False) -> Optional[str]:
+    if not date:
+        return None
+    pattern = r"\b(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})\s+(\d{1,2}:\d{2}\s*[AP]M)\b"
+    matches = list(re.finditer(pattern, text, re.IGNORECASE))
+    for match in reversed(matches) if last else matches:
+        if _normalise_uk_date(match.group(1)) != date:
+            continue
+        try:
+            time = datetime.strptime(match.group(2).upper(), "%I:%M %p").time()
+        except ValueError:
+            continue
+        return datetime.fromisoformat(date).replace(
+            hour=time.hour, minute=time.minute, tzinfo=ZoneInfo("Europe/London")
+        ).isoformat()
+    return date
+
+
+def parse_beyond_events(
+    source: SourceConfig, body: str, _fetcher: PoliteFetcher
+) -> list[Listing]:
+    """Parse BEYOND's public Ticket Tailor event listing."""
+    soup = BeautifulSoup(body, "html.parser")
+    listings: list[Listing] = []
+    for card in soup.select("li.events-listing__item"):
+        link = card.select_one("h3.event__title a.event__link[href]")
+        if not link:
+            continue
+        title = link.get_text(" ", strip=True)
+        href = str(link.get("href", "")).strip()
+        if not title or not href:
+            continue
+        date_element = card.select_one(".event-meta__date")
+        date_text = date_element.get_text(" ", strip=True) if date_element else ""
+        event_start, event_end = _extract_event_dates(date_text)
+        event_start = _beyond_datetime(event_start, date_text)
+        event_end = _beyond_datetime(event_end, date_text, last=True)
+        location_element = card.select_one(".event-meta__location")
+        location = location_element.get_text(" ", strip=True) if location_element else ""
+        listings.append(
+            Listing(
+                title=title,
+                organisation="BEYOND Conference",
+                location=location or "Not stated",
+                remote="online" in location.lower(),
+                type="event",
+                summary="Creative industry events from BEYOND Conference.",
+                event_start=event_start,
+                event_end=event_end,
+                source_name=source.name,
+                source_url=urljoin(source.url, href),
+            )
+        )
+    return listings
+
+
 def parse_rts_events(
     source: SourceConfig, body: str, _fetcher: PoliteFetcher
 ) -> list[Listing]:
@@ -265,17 +326,28 @@ def parse_ukie_events(
     """Parse UKIE games and interactive media events page."""
     soup = BeautifulSoup(body, "html.parser")
     listings: list[Listing] = []
+    link_selector = "a[href*='eventbrite.co.uk/e/'], a[href*='/events/']"
 
-    for link in soup.select("a[href*='eventbrite.co.uk/e/'], a[href*='/events/']"):
+    for link in soup.select(link_selector):
         href = str(link.get("href", ""))
         heading = link.find(["h2", "h3", "h4"])
         title = heading.get_text(" ", strip=True) if heading else link.get_text(" ", strip=True)
         if not title or len(title) < 6 or _is_utility_event_link(title, href):
             continue
 
-        card = link.find_parent(["article", "li", "div"]) or link
+        card = link
+        if not link.select_one(".date, time"):
+            parent = link.find_parent(["article", "li", "div"])
+            if parent and len(parent.select(link_selector)) == 1 and len(parent.select("h2, h3, h4")) <= 1:
+                card = parent
         card_text = card.get_text(" ", strip=True)
-        event_start, event_end = _extract_event_dates(card_text)
+        date_element = card.select_one(".date, time")
+        date_text = date_element.get_text(" ", strip=True) if date_element else card_text
+        event_start, event_end = _extract_event_dates(date_text)
+        has_range = bool(re.search(r"\s+(?:to|until|through)\s+|\s*[-\u2013\u2014]\s*", date_text, re.I))
+        if event_end and (not date_element or not has_range):
+            logger.warning("Ambiguous UKIE event dates for '%s'; leaving the date unstated", title)
+            event_start, event_end = None, None
 
         listings.append(
             Listing(

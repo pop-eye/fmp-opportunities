@@ -60,6 +60,87 @@ jobs:
     rate_limit_seconds: 3.0
     notes: Disabled by default because Cloudflare returns HTTP 403 to automated requests.
 
+apprenticeships:
+  - name: Find an apprenticeship (DfE)
+    type: api
+    url: https://api.apprenticeships.education.gov.uk/vacancies/vacancy
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_dfe_apprenticeships
+    rate_limit_seconds: 2.0
+    options: {routes: [Creative and design, Digital], page_size: 100, max_pages: 50}
+    notes: Official Display Advert API v2. Requires DFE_APPRENTICESHIPS_API_KEY. English vacancies; up to 50 pages per run.
+
+  - name: Reed Creative Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: creative apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Video Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: video apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Digital Marketing Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: digital marketing apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Design Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: graphic design apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Social Media Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: social media apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Broadcast Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: broadcast apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: Reed Games Apprenticeships
+    type: api
+    url: https://www.reed.co.uk/api/1.0/search
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_reed_apprenticeships
+    rate_limit_seconds: 1.0
+    options: {keywords: games apprentice, locationName: "", resultsToTake: 100}
+    notes: Official Reed API; requires REED_API_KEY.
+
+  - name: gamesJobs Apprenticeships
+    type: rss
+    url: https://gamesjobs.co.uk/feed.xml
+    enabled: true
+    parser: fmp_opportunities.tools.apprenticeships:parse_gamesjobs_apprenticeships
+    rate_limit_seconds: 2.0
+    notes: UK games industry RSS; only apprenticeship titles are retained.
+
 placements:
   - name: Reed Media Internships
     type: api
@@ -233,6 +314,35 @@ events:
     parser: fmp_opportunities.tools.events:parse_factory_international
     rate_limit_seconds: 2.0
     notes: Public Whats On page at Aviva Studios, Manchester.
+
+  - name: FACT Liverpool
+    type: html
+    url: https://www.fact.co.uk/whats-on
+    enabled: false
+    rate_limit_seconds: 5.0
+    notes: Manual browsing only. FACT's terms restrict reproduction; confirm permission before automated import.
+
+  - name: The Whitworth
+    type: html
+    url: https://www.whitworth.manchester.ac.uk/whats-on/
+    enabled: false
+    rate_limit_seconds: 5.0
+    notes: Manual browsing only. Confirm permission and configure a parser before automated import.
+
+  - name: Eventbrite Manchester Art
+    type: html
+    url: https://www.eventbrite.co.uk/d/united-kingdom--manchester/art/
+    enabled: false
+    rate_limit_seconds: 5.0
+    notes: Manual browsing only. Eventbrite terms prohibit scraping and automated data extraction.
+
+  - name: BEYOND Conference
+    type: html
+    url: https://tickets.beyondconference.org/events/beyond/
+    enabled: true
+    parser: fmp_opportunities.tools.events:parse_beyond_events
+    rate_limit_seconds: 5.0
+    notes: Public BEYOND ticket listings; robots.txt allows access. Check event details and availability on the source.
 
   - name: Royal Television Society Events
     type: html

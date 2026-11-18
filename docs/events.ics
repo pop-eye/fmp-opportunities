@@ -7,7 +7,7 @@ BEGIN:VEVENT
 SUMMARY:BEYOND 2026
 DTSTART:20261123T120000Z
 DTEND:20261125T170000Z
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:4b2419e26d7473e4@fmp-opportunities
 DESCRIPTION:Organiser: BEYOND Conference\nCreative industry events from BE
  YOND Conference.\nLink: https://tickets.beyondconference.org/events/beyond
@@ -19,7 +19,7 @@ BEGIN:VEVENT
 SUMMARY:BEYOND Festival Events
 DTSTART:20261123T150000Z
 DTEND:20261125T190000Z
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:b762438b94456da1@fmp-opportunities
 DESCRIPTION:Organiser: BEYOND Conference\nCreative industry events from BE
  YOND Conference.\nLink: https://tickets.beyondconference.org/events/beyond
@@ -30,7 +30,7 @@ END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Cambridge Film People: From Concept to Screen
 DTSTART;VALUE=DATE:20261124
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:8aa27f388ee91e7f@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nEast Cambridge Film Peopl
  e: From Concept to Screen Cambridge Date 24 November 2026\nLink: https://r
@@ -42,7 +42,7 @@ BEGIN:VEVENT
 SUMMARY:Winter at Aviva Studios
 DTSTART;VALUE=DATE:20261201
 DTEND;VALUE=DATE:20270131
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:24283652843bcda5@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Winter at Aviva Studios Celebrate the festive season at Aviva Studios with
@@ -52,9 +52,20 @@ LOCATION:Manchester
 URL:https://factoryinternational.org/whats-on/winter-at-aviva-studios/
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:RTS Midlands Awards 2026
+DTSTART;VALUE=DATE:20261202
+DTSTAMP:20261118T195449Z
+UID:3e813ee5a252c446@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nMidlands RTS Midlands Awa
+ rds 2026 Birmingham Date 2 December 2026\nLink: https://rts.org.uk/events/
+ rts-midlands-awards-2026
+LOCATION:Birmingham
+URL:https://rts.org.uk/events/rts-midlands-awards-2026
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:The Funding Landscape - What’s Happening in the East? | Part 2
 DTSTART;VALUE=DATE:20261202
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:88c1702aa604d802@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nEast The Funding Landscap
  e - What’s Happening in the East? | Part 2 Norwich Date 2 December 2026
@@ -65,10 +76,21 @@ URL:https://rts.org.uk/events/funding-landscape-what-s-happening-east-part
  -2
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:Avid User Group Cymru 2026
+DTSTART;VALUE=DATE:20261203
+DTSTAMP:20261118T195449Z
+UID:7fb7a2b0d35cb511@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nCymru / Wales Avid User G
+ roup Cymru 2026 Cardiff Date 3 December 2026\nLink: https://rts.org.uk/eve
+ nts/avid-user-group-cymru-2026
+LOCATION:UK
+URL:https://rts.org.uk/events/avid-user-group-cymru-2026
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:Onwards and Sideways | Exclusive Screening and Q&A with producer H
  ilary Bevan Jones
 DTSTART;VALUE=DATE:20261204
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:ecc0137cb518bb49@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nEast Onwards and Sideways
   | Exclusive Screening and Q&A with producer Hilary Bevan Jones Date 4 Dec
@@ -79,10 +101,33 @@ URL:https://rts.org.uk/events/onwards-and-sideways-exclusive-screening-and
  -qa-producer-hilary-bevan-jones
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:RTS Craft & Design Awards 2026
+DTSTART;VALUE=DATE:20261207
+DTSTAMP:20261118T195449Z
+UID:4765c14a1ad507f9@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nAwards RTS Craft & Design
+  Awards 2026 London Date 7 December 2026\nLink: https://rts.org.uk/events/
+ rts-craft-design-awards-2026
+LOCATION:London
+URL:https://rts.org.uk/events/rts-craft-design-awards-2026
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:2026 Review of the Year Quiz & Christmas Social
+DTSTART;VALUE=DATE:20261208
+DTSTAMP:20261118T195449Z
+UID:5351c180f3667608@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nNorth East and the Border
+ s 2026 Review of the Year Quiz & Christmas Social Newcastle Upon Tyne Date
+  8 December 2026\nLink: https://rts.org.uk/events/2026-review-year-quiz-ch
+ ristmas-social
+LOCATION:UK
+URL:https://rts.org.uk/events/2026-review-year-quiz-christmas-social
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:David Bowie: You're Not Alone
 DTSTART;VALUE=DATE:20261208
 DTEND;VALUE=DATE:20270110
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:631df54a5fc76520@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  David Bowie: You're Not Alone Discover the creative mind\, spirit and soul
@@ -95,7 +140,7 @@ BEGIN:VEVENT
 SUMMARY:Prehistoric Planet: Discovering Dinosaurs
 DTSTART;VALUE=DATE:20261208
 DTEND;VALUE=DATE:20270106
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:41aa3633654f1538@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Prehistoric Planet: Discovering Dinosaurs Stand face-to-face with the grea
@@ -109,7 +154,7 @@ END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Anatomy of a Hit: Rivals
 DTSTART;VALUE=DATE:20261209
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:8aa95d40207e65a5@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nRTS Futures Anatomy of a 
  Hit: Rivals London Date 9 December 2026\nLink: https://rts.org.uk/events/a
@@ -118,28 +163,74 @@ LOCATION:London
 URL:https://rts.org.uk/events/anatomy-hit-rivals
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Pitching Skills Workshop with Jon Torrens
+SUMMARY:Cwis Nadolig RTS Cymru Wales 2026
 DTSTART;VALUE=DATE:20261209
-DTEND;VALUE=DATE:20270211
-DTSTAMP:20261118T185948Z
-UID:357dfce0bc5f0d62@fmp-opportunities
+DTSTAMP:20261118T195449Z
+UID:c07a3649deff49b2@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nCymru / Wales Cwis Nadoli
+ g RTS Cymru Wales 2026 Cardiff Date 9 December 2026\nLink: https://rts.org
+ .uk/events/cwis-nadolig-rts-cymru-wales-2026
+LOCATION:UK
+URL:https://rts.org.uk/events/cwis-nadolig-rts-cymru-wales-2026
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Ukie Friends Festive Drinks 2026
+DTSTART;VALUE=DATE:20261209
+DTSTAMP:20261118T195449Z
+UID:3f7375fac60a6372@fmp-opportunities
 DESCRIPTION:Organiser: UKIE (Games & Interactive)\nDecember 9\, 2026 Ukie 
  Friends Festive Drinks 2026 We'd like to invite all friends of Ukie to our
   annual festive drinks at our office in London on Wednesday 9th December! 
- Read More February 3\, 2027 Pitching Skills Workshop with Jon Torrens Join
-  Jon Torrens for a half-day workshop and learn how to pitch with confidenc
- e! Read More February 11\, 2027 Ukie Conference 2027 The Ukie Conference 2
- 027 unites\nLink: https://www.eventbrite.co.uk/e/pitching-skills-workshop-
- with-jon-torrens-tickets-2002435389153
+ Read More\nLink: https://www.eventbrite.co.uk/e/ukie-friends-festive-drink
+ s-2026-tickets-2002807253409
 LOCATION:London
+URL:https://www.eventbrite.co.uk/e/ukie-friends-festive-drinks-2026-ticket
+ s-2002807253409
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Annual General Meeting of RTS Scotland 2027
+DTSTART;VALUE=DATE:20270115
+DTSTAMP:20261118T195449Z
+UID:7abac7813d09ac7a@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nScotland Annual General M
+ eeting of RTS Scotland 2027 Date 15 January 2027\nLink: https://rts.org.uk
+ /events/annual-general-meeting-rts-scotland-2027
+LOCATION:UK
+URL:https://rts.org.uk/events/annual-general-meeting-rts-scotland-2027
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Pitching Skills Workshop with Jon Torrens
+DTSTART;VALUE=DATE:20270203
+DTSTAMP:20261118T195449Z
+UID:357dfce0bc5f0d62@fmp-opportunities
+DESCRIPTION:Organiser: UKIE (Games & Interactive)\nFebruary 3\, 2027 Pitch
+ ing Skills Workshop with Jon Torrens Join Jon Torrens for a half-day works
+ hop and learn how to pitch with confidence! Read More\nLink: https://www.e
+ ventbrite.co.uk/e/pitching-skills-workshop-with-jon-torrens-tickets-200243
+ 5389153
+LOCATION:UK
 URL:https://www.eventbrite.co.uk/e/pitching-skills-workshop-with-jon-torre
  ns-tickets-2002435389153
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Ukie Conference 2027
+DTSTART;VALUE=DATE:20270211
+DTSTAMP:20261118T195449Z
+UID:cb21ae5ac3b9468f@fmp-opportunities
+DESCRIPTION:Organiser: UKIE (Games & Interactive)\nFebruary 11\, 2027 Ukie
+  Conference 2027 The Ukie Conference 2027 unites the UK’s games and inte
+ ractive entertainment ecosystem to supercharge the future of our industry.
+  Read More\nLink: https://www.eventbrite.co.uk/e/ukie-conference-2027-tick
+ ets-1997844247926
+LOCATION:UK
+URL:https://www.eventbrite.co.uk/e/ukie-conference-2027-tickets-1997844247
+ 926
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Hetain Patel: Come As You Really Are
 DTSTART;VALUE=DATE:20270220
 DTEND;VALUE=DATE:20270220
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:a07e13236083b391@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Hetain Patel: Come As You Really Are Explore the playful worlds of Greater
@@ -154,7 +245,7 @@ BEGIN:VEVENT
 SUMMARY:It's a Sin
 DTSTART;VALUE=DATE:20270227
 DTEND;VALUE=DATE:20270227
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:61e63a40d3b86c7b@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  It's a Sin Joy\, loss and defiance collide in a new dance adaptation of th
@@ -167,7 +258,7 @@ BEGIN:VEVENT
 SUMMARY:AN ARK
 DTSTART;VALUE=DATE:20270410
 DTEND;VALUE=DATE:20270410
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:91243948510e8ad7@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  AN ARK Experience the moments that shape a life in the world's first Mixed
@@ -180,7 +271,7 @@ BEGIN:VEVENT
 SUMMARY:Factory International at 20
 DTSTART;VALUE=DATE:20271231
 DTEND;VALUE=DATE:20271231
-DTSTAMP:20261118T185948Z
+DTSTAMP:20261118T195449Z
 UID:29b37671e7c18e0d@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Factory International at 20 Our 2027 season celebrates 20 years of era-def
