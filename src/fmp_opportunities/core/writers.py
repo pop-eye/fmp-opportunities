@@ -67,6 +67,8 @@ def _format_rss_description(listing: Listing) -> str:
         parts.append(f"Disciplines: {', '.join(listing.category_tags)}")
     if listing.paid:
         parts.append(f"Pay: {listing.paid}")
+    if listing.apprenticeship_level is not None:
+        parts.append(f"Apprenticeship level: {listing.apprenticeship_level}")
     if listing.event_start:
         parts.append(f"When: {listing.event_start}")
     if listing.cost:

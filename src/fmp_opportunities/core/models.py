@@ -49,6 +49,7 @@ class Listing:
     last_seen: Optional[str] = None
     unique_id: str = ""
     paid: Optional[str] = None
+    apprenticeship_level: Optional[int] = None
     event_start: Optional[str] = None
     event_end: Optional[str] = None
     cost: Optional[str] = None
@@ -89,6 +90,7 @@ class Listing:
             last_seen=data.get("last_seen"),
             unique_id=data.get("unique_id", ""),
             paid=data.get("paid"),
+            apprenticeship_level=data.get("apprenticeship_level"),
             event_start=data.get("event_start"),
             event_end=data.get("event_end"),
             cost=data.get("cost"),

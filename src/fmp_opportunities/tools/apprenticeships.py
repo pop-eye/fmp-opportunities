@@ -20,6 +20,11 @@ from fmp_opportunities.tools.placements import detect_paid_status, placement_sor
 logger = logging.getLogger(__name__)
 
 
+def _level_from_title(title: str) -> Optional[int]:
+    match = re.search(r"\blevel\s*([2-8])\b", title, re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
 def _apprenticeship_candidates(listings: list[Listing]) -> list[Listing]:
     candidates = []
     for item in listings:
@@ -27,6 +32,7 @@ def _apprenticeship_candidates(listings: list[Listing]) -> list[Listing]:
             logger.info("DROP [apprenticeships] %s: title does not identify an apprenticeship", item.title)
             continue
         item.type = "apprenticeship"
+        item.apprenticeship_level = _level_from_title(item.title)
         candidates.append(item)
     return candidates
 
@@ -97,6 +103,12 @@ def parse_dfe_apprenticeships(source: SourceConfig, _body: str, fetcher: PoliteF
             if not isinstance(course, dict):
                 raise ValueError(f"{source.name}: invalid vacancy course")
             course_title = str(course.get("title") or "").strip()
+            level = course.get("level")
+            if level is not None and (type(level) is not int or not 2 <= level <= 8):
+                logger.warning("Ignoring invalid apprenticeship level for %s", title)
+                level = None
+            if level is None:
+                level = _level_from_title(course_title) or _level_from_title(title)
             description = _strip_html(str(vacancy.get("description") or ""))
             summary = " ".join(part for part in (course_title, description) if part)
             wage = vacancy.get("wage") or {}
@@ -111,6 +123,7 @@ def parse_dfe_apprenticeships(source: SourceConfig, _body: str, fetcher: PoliteF
                 posted_date=str(vacancy.get("postedDate") or "")[:10] or None,
                 closing_date=str(vacancy.get("closingDate") or "")[:10] or None,
                 paid="paid" if wage.get("wageType") else None,
+                apprenticeship_level=level,
                 source_name=source.name,
                 source_url=url,
             ))
@@ -126,6 +139,19 @@ def normalise_apprenticeship(listing: Listing) -> Listing:
     if listing.paid is None:
         listing.paid = detect_paid_status(f"{listing.title} {listing.summary}")
     return listing
+
+
+def apprenticeship_sort_key(listing: Listing) -> tuple:
+    level = listing.apprenticeship_level
+    if level is not None and 4 <= level <= 7:
+        rank = 0
+    elif level is None:
+        rank = 1
+    elif level == 3:
+        rank = 2
+    else:
+        rank = 3
+    return (rank, *placement_sort_key(listing))
 
 
 def run_apprenticeships(
@@ -149,7 +175,7 @@ def run_apprenticeships(
         channel_description="Creative and digital apprenticeships for Future Media Production students.",
         fetcher=fetcher,
         normalise_fn=normalise_apprenticeship,
-        sort_key_fn=placement_sort_key,
+        sort_key_fn=apprenticeship_sort_key,
         llm_hook=llm_hook,
         dry_run=dry_run,
     )

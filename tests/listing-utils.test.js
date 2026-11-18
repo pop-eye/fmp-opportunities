@@ -25,3 +25,12 @@ test("new this week changes with time and regional matches use location only", (
   assert.equal(u.northWest("Stockport, Greater Manchester"), true);
   assert.equal(u.northWest("London"), false);
 });
+
+test("apprenticeship level filters preserve unknown and level 3 options", () => {
+  for (const level of [4, 5, 6, 7]) assert.equal(u.matchesApprenticeshipLevel(level, "higher"), true);
+  for (const level of [2, 3, 8, null, undefined]) assert.equal(u.matchesApprenticeshipLevel(level, "higher"), false);
+  assert.equal(u.matchesApprenticeshipLevel(3, "3"), true);
+  assert.equal(u.matchesApprenticeshipLevel(null, "unknown"), true);
+  assert.equal(u.matchesApprenticeshipLevel(3, "unknown"), false);
+  assert.equal(u.matchesApprenticeshipLevel(null, "all"), true);
+});

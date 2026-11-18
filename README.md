@@ -20,6 +20,8 @@ The placements feed searches the Reed API across creative disciplines and includ
 
 The apprenticeships feed searches the official Find an apprenticeship Display Advert API for English vacancies in the Creative and design and Digital routes, the Reed API using creative search terms, and the gamesJobs RSS feed. Relevant role terms in [keywords.yaml](keywords.yaml) filter the results. The official API and Reed require separate keys; gamesJobs may have no apprenticeship listings. The DfE search is limited to 50 pages per run and logs a warning if more pages are available. Results may be incomplete, so the page also links to the official search for manual browsing. Check whether each opportunity is suitable alongside existing studies.
 
+The apprenticeships page defaults to levels 4 to 7. Students can select level 3, all levels, or listings with an unstated level. The official API supplies the course level; other sources are labelled only when their listing title states a level. The RSS feed includes all levels, with levels 4 to 7 first. The page also links to BBC careers and Sky apprenticeships for manual browsing, not automatic import. An apprenticeship level does not guarantee eligibility for someone with an existing degree; check each opportunity's requirements and funding rules.
+
 ## Project structure
 
 * [run.py](run.py): command line entry point.

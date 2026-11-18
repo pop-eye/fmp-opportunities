@@ -37,14 +37,14 @@ def test_official_api_paginates_and_maps_vacancies(monkeypatch, tmp_path: Path) 
         {"totalPages": 2, "vacancies": [{
             "title": "Content Creator", "description": "Create video and social media",
             "employerName": "Studio", "vacancyUrl": "https://example.com/vacancy/1",
-            "course": {"title": "Content creator (level 3)"},
+            "course": {"title": "Content creator (level 3)", "level": 3},
             "addresses": [{"addressLine3": "Manchester", "postcode": "M1 1AA"},
                           {"addressLine3": "Liverpool", "postcode": "L1 1AA"}],
             "wage": {"wageType": "Custom"}, "closingDate": "2099-12-01T23:59:59Z",
         }]},
         {"totalPages": 2, "vacancies": [{
             "title": "Digital Media Apprentice", "vacancyUrl": "https://example.com/vacancy/2",
-            "isNationalVacancy": True, "course": {"title": "Digital media"},
+            "isNationalVacancy": True, "course": {"title": "Digital media", "level": 6},
         }]},
     ])
     source = SourceConfig(name="DfE", type="api", url="https://example.com/vacancy",
@@ -56,6 +56,7 @@ def test_official_api_paginates_and_maps_vacancies(monkeypatch, tmp_path: Path) 
     assert fetcher.calls[0]["headers"] == {"Ocp-Apim-Subscription-Key": "test-key", "X-Version": "2"}
     assert items[0].location == "Multiple locations: Manchester, M1 1AA; Liverpool, L1 1AA"
     assert (items[0].type, items[0].paid, items[0].closing_date) == ("apprenticeship", "paid", "2099-12-01")
+    assert [item.apprenticeship_level for item in items] == [3, 6]
     assert items[1].location == "National (see listing)"
     assert items[1].paid is None
 
@@ -97,15 +98,18 @@ def test_games_feed_only_keeps_apprentice_titles(tmp_path: Path) -> None:
 def test_reed_apprenticeships_require_apprenticeship_title(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("REED_API_KEY", "test-key")
     fetcher = StubFetcher(tmp_path, [{"results": [
-        {"jobTitle": "Video Production Apprentice", "jobUrl": "https://example.com/1",
+        {"jobTitle": "Level 4 Video Production Apprentice", "jobUrl": "https://example.com/1",
          "jobDescription": "Film and video production", "locationName": "Manchester"},
+        {"jobTitle": "Media Apprentice", "jobUrl": "https://example.com/3",
+         "jobDescription": "Requires level 2 English", "locationName": "Manchester"},
         {"jobTitle": "Video Editor", "jobUrl": "https://example.com/2",
          "jobDescription": "Help supervise our apprentices", "locationName": "Manchester"},
     ]}])
     source = SourceConfig(name="Reed", type="api", url="https://example.com/search",
                           options={"keywords": "video apprentice", "locationName": ""})
     items = parse_reed_apprenticeships(source, "", fetcher)
-    assert [item.title for item in items] == ["Video Production Apprentice"]
+    assert [item.title for item in items] == ["Level 4 Video Production Apprentice", "Media Apprentice"]
+    assert [item.apprenticeship_level for item in items] == [4, None]
     assert "locationName" not in fetcher.calls[0]["params"]
 
 
@@ -114,6 +118,10 @@ def test_apprenticeships_feed_filters_irrelevant_and_writes_outputs(monkeypatch,
     fetcher = StubFetcher(tmp_path, [{"totalPages": 1, "vacancies": [
         {"title": "Content Creator", "vacancyUrl": "https://example.com/creative",
          "course": {"title": "Content creator (level 3)"}, "description": "Create posts"},
+        {"title": "Digital Learning Designer Apprentice", "vacancyUrl": "https://example.com/learning",
+         "course": {"title": "Digital learning designer", "level": 5}, "description": "Design learning"},
+        {"title": "Video Apprentice", "vacancyUrl": "https://example.com/video",
+         "course": {"title": "Video", "level": True}, "description": "Video editing"},
         {"title": "Electrical Apprentice", "vacancyUrl": "https://example.com/electrical",
          "course": {"title": "Electrician"}, "description": "Electrical installation"},
     ]}])
@@ -123,10 +131,17 @@ def test_apprenticeships_feed_filters_irrelevant_and_writes_outputs(monkeypatch,
         [source], load_keywords("keywords.yaml", "apprenticeships"), tmp_path / "docs",
         tmp_path / "state.json", "https://example.com/apprenticeships", fetcher=fetcher,
     )
-    assert [item.title for item in result.listings] == ["Content Creator"]
+    assert [item.title for item in result.listings] == [
+        "Digital Learning Designer Apprentice", "Video Apprentice", "Content Creator",
+    ]
     data = json.loads((tmp_path / "docs" / "apprenticeships.json").read_text(encoding="utf-8"))
     assert data["items"][0]["type"] == "apprenticeship"
-    assert ET.parse(tmp_path / "docs" / "apprenticeships.xml").find("./channel/item/title").text == "Content Creator"
+    assert [item["apprenticeship_level"] for item in data["items"]] == [5, None, 3]
+    feed = ET.parse(tmp_path / "docs" / "apprenticeships.xml")
+    assert feed.find("./channel/item/title").text == "Digital Learning Designer Apprentice"
+    assert "Apprenticeship level: 5" in feed.find("./channel/item/description").text
+    state = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    assert Listing.from_dict(next(iter(state["apprenticeships"]["items"].values()))).apprenticeship_level == 5
     assert "apprenticeships" in load_sources("sources.yaml")
 
 
