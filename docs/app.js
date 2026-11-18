@@ -12,6 +12,7 @@
     remote: $("filter-remote"),
     northwest: $("filter-northwest"),
     type: $("filter-type"),
+    level: $("filter-level"),
     paid: $("filter-paid"),
     dateRange: $("filter-date-range"),
     newOnly: $("filter-new"),
@@ -49,6 +50,7 @@
   if (view === "new") controls.newOnly.checked = true;
   if (view === "closing" && controls.closing) controls.closing.checked = true;
   if (view === "saved") controls.saved.checked = true;
+  if (view === "saved" && controls.level) controls.level.value = "all";
 
   function escapeHtml(value) {
     return String(value || "").replace(/[&<>"']/g, (char) => ({
@@ -119,6 +121,7 @@
       if (controls.remote.checked && !item.remote) return false;
       if (controls.northwest.checked && !ListingUtils.northWest(item.location)) return false;
       if (controls.type && controls.type.value && item.type !== controls.type.value) return false;
+      if (controls.level && !ListingUtils.matchesApprenticeshipLevel(item.apprenticeship_level, controls.level.value)) return false;
       if (controls.paid && controls.paid.value && (item.paid || "not stated") !== controls.paid.value) return false;
       if (controls.dateRange && !matchesRange(item, controls.dateRange.value)) return false;
       if (controls.newOnly.checked && !ListingUtils.isNew(item)) return false;
@@ -155,6 +158,9 @@
         }
         if (tool === "placements" || tool === "apprenticeships") {
           details.push(["Pay", item.paid || "Not stated"]);
+        }
+        if (tool === "apprenticeships") {
+          details.push(["Apprenticeship level", Number.isInteger(item.apprenticeship_level) ? `Level ${item.apprenticeship_level}` : "Not stated"]);
         }
       }
       if (item.source_name) details.push(["Source", item.source_name]);

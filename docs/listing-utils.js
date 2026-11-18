@@ -49,7 +49,14 @@
     return /\b(manchester|salford|liverpool|merseyside|cheshire|lancashire|cumbria|north west|bolton|stockport|bury|rochdale|oldham|wigan|preston|blackpool|chester|warrington|blackburn|lancaster)\b/i.test(location || "");
   }
 
-  const api = { ukToday, datePart, daysFromToday, isExpired, isNew, closingSoon, northWest };
+  function matchesApprenticeshipLevel(level, filter) {
+    if (filter === "all") return true;
+    if (filter === "unknown") return !Number.isInteger(level);
+    if (filter === "higher") return Number.isInteger(level) && level >= 4 && level <= 7;
+    return Number.isInteger(level) && String(level) === filter;
+  }
+
+  const api = { ukToday, datePart, daysFromToday, isExpired, isNew, closingSoon, northWest, matchesApprenticeshipLevel };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else global.ListingUtils = api;
 })(typeof window === "undefined" ? globalThis : window);

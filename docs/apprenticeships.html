@@ -12,7 +12,7 @@
     <header class="page-header">
       <p class="page-kicker"><a href="index.html">FMP / Opportunities</a> <span aria-hidden="true">✳</span> Learn on the job</p>
       <h1>Creative and Digital Apprenticeships</h1>
-      <p>Explore opportunities to work, learn and develop creative skills.</p>
+      <p>Explore opportunities to work, learn and develop creative skills. The default view focuses on levels 4 to 7.</p>
       <div class="meta-row">
         <span id="last-updated">Last updated: loading</span>
         <a href="apprenticeships.xml">RSS Feed (apprenticeships.xml)</a>
@@ -30,6 +30,19 @@
         <div class="control-group">
           <label for="filter-search">Search keywords</label>
           <input id="filter-search" type="search" placeholder="Title, employer, skills">
+        </div>
+        <div class="control-group">
+          <label for="filter-level">Apprenticeship level</label>
+          <select id="filter-level">
+            <option value="higher">Levels 4 to 7</option>
+            <option value="all">All levels</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+            <option value="7">Level 7</option>
+            <option value="unknown">Level not stated</option>
+          </select>
         </div>
         <details id="more-filters" class="more-filters">
           <summary>Filters and sorting</summary>
@@ -62,7 +75,7 @@
           </div>
         </details>
       </section>
-      <p class="notice">Check eligibility, training level, pay and dates on the original listing. Apprenticeships may not suit students already in full-time study. Saved opportunities stay on this device. <a href="apprenticeships.html?view=saved">View saved apprenticeships</a>.</p>
+      <p class="notice">Choose All levels to include level 3 and opportunities where the level is not stated. Check eligibility, training level, pay and dates on the original listing: having a degree may affect eligibility or funding. Apprenticeships may not suit students already in full-time study. Saved opportunities stay on this device. <a href="apprenticeships.html?view=saved">View saved apprenticeships</a>.</p>
       <p id="save-status" role="status" class="status-bar"></p>
       <details id="map-details" class="map-section">
         <summary>Show approximate locations on a map</summary>
@@ -74,8 +87,12 @@
       <ul id="listings" class="listings"></ul>
       <section aria-labelledby="more-sources">
         <h2 id="more-sources">More places to look</h2>
-        <p>Search the official service for more opportunities and check each listing for eligibility.</p>
-        <ul><li><a href="https://www.findapprenticeship.service.gov.uk/apprenticeshipsearch">Find an apprenticeship (GOV.UK)</a></li></ul>
+        <p>Search these sites separately for more opportunities. Their listings are not all imported here, so check the level, availability and eligibility.</p>
+        <ul>
+          <li><a href="https://www.findapprenticeship.service.gov.uk/apprenticeshipsearch">Find an apprenticeship (GOV.UK)</a></li>
+          <li><a href="https://careers.bbc.co.uk/search/">BBC careers</a></li>
+          <li><a href="https://careers.sky.com/earlycareers/apprenticeships">Sky apprenticeships</a></li>
+        </ul>
       </section>
     </main>
   </div>
