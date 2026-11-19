@@ -14,7 +14,7 @@ The events page also has a monthly calendar. It follows the active filters; sele
 
 For UKIE events, dates are read from each individual event card rather than from neighbouring listings. Ambiguous multiple dates are left unstated and a warning is logged rather than assuming a continuous range.
 
-Event sources are listed under `events` in [sources.yaml](sources.yaml). FACT Liverpool, the Whitworth and Eventbrite are recorded there for manual browsing, but disabled for automated imports. FACT and the Whitworth need permission and parser checks; Eventbrite prohibits automated scraping in its terms. BEYOND Conference and Factory International are configured for automatic checks.
+Event sources are listed under `events` in [sources.yaml](sources.yaml). School of Digital Arts events, FACT Liverpool, the Whitworth and Eventbrite are recorded there for manual browsing, but disabled for automated imports. The School of Digital Arts is also linked from the events page; the university's website terms require express written permission to republish information. FACT and the Whitworth need permission and parser checks; Eventbrite prohibits automated scraping in its terms. BEYOND Conference and Factory International are configured for automatic checks.
 
 The placements feed searches the Reed API across creative disciplines and includes relevant internships from the gamesJobs RSS feed. Reed requires `REED_API_KEY`; gamesJobs permits light, polite RSS access, and its feed is limited to recent entries. The placements page also links to Higherin, Channel 4, Sky and Prospects for manual browsing. Those links are not automatically imported, and the availability and eligibility of individual programmes must be checked on the original sites.
 

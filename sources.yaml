@@ -299,6 +299,13 @@ placements:
     notes: robots.txt allows /jobs/ and /search/jobs/ (no query strings). Disabled until HTML selectors are tuned for live layout.
 
 events:
+  - name: School of Digital Arts Events
+    type: html
+    url: https://www.mmu.ac.uk/about-us/faculties/arts-humanities/schools/school-of-digital-arts/events
+    enabled: false
+    rate_limit_seconds: 5.0
+    notes: Manual browsing only. The university's website terms require express written permission to republish information.
+
   - name: HOME Manchester
     type: html
     url: https://homemcr.org/whats-on/
