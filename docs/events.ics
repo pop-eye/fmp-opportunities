@@ -7,7 +7,7 @@ BEGIN:VEVENT
 SUMMARY:BEYOND 2026
 DTSTART:20261123T120000Z
 DTEND:20261125T170000Z
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:4b2419e26d7473e4@fmp-opportunities
 DESCRIPTION:Organiser: BEYOND Conference\nCreative industry events from BE
  YOND Conference.\nLink: https://tickets.beyondconference.org/events/beyond
@@ -19,7 +19,7 @@ BEGIN:VEVENT
 SUMMARY:BEYOND Festival Events
 DTSTART:20261123T150000Z
 DTEND:20261125T190000Z
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:b762438b94456da1@fmp-opportunities
 DESCRIPTION:Organiser: BEYOND Conference\nCreative industry events from BE
  YOND Conference.\nLink: https://tickets.beyondconference.org/events/beyond
@@ -28,21 +28,10 @@ LOCATION:MediaCity Studios (Previously Hot House)\, M50 2NT
 URL:https://tickets.beyondconference.org/events/beyond/2507970
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Cambridge Film People: From Concept to Screen
-DTSTART;VALUE=DATE:20261124
-DTSTAMP:20261118T202646Z
-UID:8aa27f388ee91e7f@fmp-opportunities
-DESCRIPTION:Organiser: Royal Television Society\nEast Cambridge Film Peopl
- e: From Concept to Screen Cambridge Date 24 November 2026\nLink: https://r
- ts.org.uk/events/cambridge-film-people-concept-screen
-LOCATION:UK
-URL:https://rts.org.uk/events/cambridge-film-people-concept-screen
-END:VEVENT
-BEGIN:VEVENT
 SUMMARY:Winter at Aviva Studios
 DTSTART;VALUE=DATE:20261201
 DTEND;VALUE=DATE:20270131
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:24283652843bcda5@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Winter at Aviva Studios Celebrate the festive season at Aviva Studios with
@@ -52,9 +41,32 @@ LOCATION:Manchester
 URL:https://factoryinternational.org/whats-on/winter-at-aviva-studios/
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:Blue Planet III: Behind the Scenes
+DTSTART;VALUE=DATE:20261202
+DTSTAMP:20261123T185312Z
+UID:7fd73c69b14144dd@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nRTS National Event Blue P
+ lanet III: Behind the Scenes Online Date 2 December 2026\nLink: https://rt
+ s.org.uk/events/blue-planet-iii-behind-scenes
+LOCATION:Online
+URL:https://rts.org.uk/events/blue-planet-iii-behind-scenes
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Sam Lovegrove: Race Mechanic   Screening & Q&A
+DTSTART;VALUE=DATE:20261202
+DTSTAMP:20261123T185312Z
+UID:1621ad71424c2a86@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nDevon and Cornwall Sam Lo
+ vegrove: Race Mechanic   Screening & Q&A Royal William Yard\, Melville Bui
+ lding Date 2 December 2026\nLink: https://rts.org.uk/events/sam-lovegrove-
+ race-mechanic-screening-qa
+LOCATION:UK
+URL:https://rts.org.uk/events/sam-lovegrove-race-mechanic-screening-qa
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:The Funding Landscape - What’s Happening in the East? | Part 2
 DTSTART;VALUE=DATE:20261202
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:88c1702aa604d802@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nEast The Funding Landscap
  e - What’s Happening in the East? | Part 2 Norwich Date 2 December 2026
@@ -65,10 +77,21 @@ URL:https://rts.org.uk/events/funding-landscape-what-s-happening-east-part
  -2
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:Avid User Group Cymru 2026
+DTSTART;VALUE=DATE:20261203
+DTSTAMP:20261123T185312Z
+UID:7fb7a2b0d35cb511@fmp-opportunities
+DESCRIPTION:Organiser: Royal Television Society\nCymru / Wales Avid User G
+ roup Cymru 2026 Cardiff Date 3 December 2026\nLink: https://rts.org.uk/eve
+ nts/avid-user-group-cymru-2026
+LOCATION:UK
+URL:https://rts.org.uk/events/avid-user-group-cymru-2026
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:Onwards and Sideways | Exclusive Screening and Q&A with producer H
  ilary Bevan Jones
 DTSTART;VALUE=DATE:20261204
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:ecc0137cb518bb49@fmp-opportunities
 DESCRIPTION:Organiser: Royal Television Society\nEast Onwards and Sideways
   | Exclusive Screening and Q&A with producer Hilary Bevan Jones Date 4 Dec
@@ -82,7 +105,7 @@ BEGIN:VEVENT
 SUMMARY:David Bowie: You're Not Alone
 DTSTART;VALUE=DATE:20261208
 DTEND;VALUE=DATE:20270110
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:631df54a5fc76520@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  David Bowie: You're Not Alone Discover the creative mind\, spirit and soul
@@ -95,7 +118,7 @@ BEGIN:VEVENT
 SUMMARY:Prehistoric Planet: Discovering Dinosaurs
 DTSTART;VALUE=DATE:20261208
 DTEND;VALUE=DATE:20270106
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:41aa3633654f1538@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Prehistoric Planet: Discovering Dinosaurs Stand face-to-face with the grea
@@ -107,20 +130,9 @@ URL:https://factoryinternational.org/whats-on/prehistoric-planet-discoveri
  ng-dinosaurs/
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Anatomy of a Hit: Rivals
-DTSTART;VALUE=DATE:20261209
-DTSTAMP:20261118T202646Z
-UID:8aa95d40207e65a5@fmp-opportunities
-DESCRIPTION:Organiser: Royal Television Society\nRTS Futures Anatomy of a 
- Hit: Rivals London Date 9 December 2026\nLink: https://rts.org.uk/events/a
- natomy-hit-rivals
-LOCATION:London
-URL:https://rts.org.uk/events/anatomy-hit-rivals
-END:VEVENT
-BEGIN:VEVENT
 SUMMARY:Pitching Skills Workshop with Jon Torrens
 DTSTART;VALUE=DATE:20270203
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:357dfce0bc5f0d62@fmp-opportunities
 DESCRIPTION:Organiser: UKIE (Games & Interactive)\nFebruary 3\, 2027 Pitch
  ing Skills Workshop with Jon Torrens Join Jon Torrens for a half-day works
@@ -135,7 +147,7 @@ BEGIN:VEVENT
 SUMMARY:Hetain Patel: Come As You Really Are
 DTSTART;VALUE=DATE:20270220
 DTEND;VALUE=DATE:20270220
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:a07e13236083b391@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Hetain Patel: Come As You Really Are Explore the playful worlds of Greater
@@ -150,7 +162,7 @@ BEGIN:VEVENT
 SUMMARY:It's a Sin
 DTSTART;VALUE=DATE:20270227
 DTEND;VALUE=DATE:20270227
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:61e63a40d3b86c7b@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  It's a Sin Joy\, loss and defiance collide in a new dance adaptation of th
@@ -163,7 +175,7 @@ BEGIN:VEVENT
 SUMMARY:AN ARK
 DTSTART;VALUE=DATE:20270410
 DTEND;VALUE=DATE:20270410
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:91243948510e8ad7@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  AN ARK Experience the moments that shape a life in the world's first Mixed
@@ -176,7 +188,7 @@ BEGIN:VEVENT
 SUMMARY:Factory International at 20
 DTSTART;VALUE=DATE:20271231
 DTEND;VALUE=DATE:20271231
-DTSTAMP:20261118T202646Z
+DTSTAMP:20261123T185312Z
 UID:29b37671e7c18e0d@fmp-opportunities
 DESCRIPTION:Organiser: Factory International (Aviva Studios)\nCost: Free\n
  Factory International at 20 Our 2027 season celebrates 20 years of era-def
